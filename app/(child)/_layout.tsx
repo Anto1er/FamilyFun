@@ -1,0 +1,54 @@
+import { Tabs } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import { COLORS } from '@/lib/constants';
+
+export default function ChildLayout() {
+  const { t } = useTranslation();
+
+  return (
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: COLORS.primary,
+        tabBarInactiveTintColor: COLORS.textLight,
+        headerStyle: { backgroundColor: COLORS.surface },
+        headerTintColor: COLORS.textPrimary,
+        tabBarStyle: { backgroundColor: COLORS.surface },
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: t('dashboard.childTitle'),
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="history"
+        options={{
+          title: t('history.title'),
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="time" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: t('settings.title'),
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="settings" size={size} color={color} />
+          ),
+        }}
+      />
+      {/* Hide sub-routes from tabs */}
+      <Tabs.Screen name="missions/index" options={{ href: null }} />
+      <Tabs.Screen name="missions/[id]" options={{ href: null }} />
+      <Tabs.Screen name="wishlist/index" options={{ href: null }} />
+      <Tabs.Screen name="wishlist/add" options={{ href: null }} />
+      <Tabs.Screen name="wishlist/[id]" options={{ href: null }} />
+    </Tabs>
+  );
+}

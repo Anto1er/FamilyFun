@@ -1,0 +1,123 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "retry": "Reessayer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "points": "points",
+    "pts": "pts"
+  },
+  "auth": {
+    "login": "Se connecter",
+    "register": "Creer un compte",
+    "logout": "Se deconnecter",
+    "email": "Email",
+    "password": "Mot de passe",
+    "displayName": "Prenom",
+    "noAccount": "Pas encore de compte ?",
+    "hasAccount": "Deja un compte ?",
+    "loginError": "Email ou mot de passe incorrect",
+    "registerError": "Erreur lors de la creation du compte"
+  },
+  "roles": {
+    "title": "Qui es-tu ?",
+    "parent": "Parent",
+    "child": "Enfant",
+    "parentDesc": "Je cree des missions et valide les recompenses",
+    "childDesc": "Je complete des missions et gagne des points"
+  },
+  "family": {
+    "title": "Ma Famille",
+    "create": "Creer une famille",
+    "join": "Rejoindre une famille",
+    "familyName": "Nom de la famille",
+    "inviteCode": "Code d'invitation",
+    "enterCode": "Entre le code de ta famille",
+    "codeInvalid": "Code invalide",
+    "members": "Membres",
+    "shareCode": "Partage ce code avec ta famille :",
+    "role": "Role",
+    "parent": "Parent",
+    "child": "Enfant",
+    "noMembers": "Aucun membre",
+    "removeChild": "Retirer de la famille",
+    "removeChildConfirm": "Retirer cet enfant de la famille :",
+    "addChild": "Ajouter un enfant",
+    "childPassword": "Mot de passe de l'enfant",
+    "changePassword": "Modifier le mot de passe",
+    "newPassword": "Nouveau mot de passe",
+    "passwordChanged": "Mot de passe modifie"
+  },
+  "missions": {
+    "title": "Missions",
+    "available": "Missions disponibles",
+    "create": "Creer une mission",
+    "missionTitle": "Titre de la mission",
+    "description": "Description",
+    "pointsReward": "Points de recompense",
+    "recurrence": "Recurrence",
+    "oneTime": "Une fois",
+    "daily": "Quotidienne",
+    "weekly": "Hebdomadaire",
+    "submit": "Mission accomplie !",
+    "submitted": "En attente de validation",
+    "approved": "Validee",
+    "rejected": "Refusee",
+    "note": "Ajouter un commentaire",
+    "noMissions": "Aucune mission disponible",
+    "pendingSubmissions": "Soumissions en attente",
+    "edit": "Modifier la mission"
+  },
+  "gifts": {
+    "title": "Liste de souhaits",
+    "add": "Ajouter un cadeau",
+    "giftTitle": "Nom du cadeau",
+    "description": "Description",
+    "imageUrl": "URL de l'image (optionnel)",
+    "linkUrl": "Lien vers le cadeau (optionnel)",
+    "pointsCost": "Cout en points",
+    "redeem": "Echanger",
+    "pendingApproval": "En attente d'approbation",
+    "approved": "Approuve",
+    "rejected": "Refuse",
+    "redeemed": "Obtenu !",
+    "approve": "Approuver",
+    "reject": "Refuser",
+    "setCost": "Definir le cout",
+    "noGifts": "Aucun cadeau dans la liste",
+    "insufficientPoints": "Points insuffisants",
+    "selectChild": "Pour qui ?",
+    "wholeFamily": "Toute la famille"
+  },
+  "dashboard": {
+    "parentTitle": "Tableau de bord",
+    "childTitle": "Mon tableau de bord",
+    "pointsBalance": "Mes points",
+    "recentActivity": "Activite recente",
+    "children": "Enfants",
+    "pendingValidations": "A valider"
+  },
+  "history": {
+    "title": "Historique",
+    "earned": "Gagne",
+    "spent": "Depense",
+    "noTransactions": "Aucune transaction"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "noNotifications": "Aucune notification",
+    "markAllRead": "Tout marquer comme lu"
+  },
+  "settings": {
+    "title": "Parametres",
+    "language": "Langue",
+    "french": "Francais",
+    "english": "Anglais",
+    "familyCode": "Code famille",
+    "profile": "Profil"
+  }
+}

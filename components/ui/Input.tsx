@@ -1,0 +1,83 @@
+import React, { useState } from 'react';
+import { TextInput, View, Text, StyleSheet, TextInputProps, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { COLORS, BORDER_RADIUS, SPACING, FONT_SIZES } from '@/lib/constants';
+
+interface InputProps extends TextInputProps {
+  label?: string;
+  error?: string;
+}
+
+export function Input({ label, error, style, secureTextEntry, ...props }: InputProps) {
+  const [hidden, setHidden] = useState(true);
+  const isPassword = secureTextEntry !== undefined && secureTextEntry;
+
+  return (
+    <View style={styles.container}>
+      {label && <Text style={styles.label}>{label}</Text>}
+      <View style={[styles.inputWrapper, error && styles.inputError]}>
+        <TextInput
+          style={[styles.input, isPassword && styles.inputWithToggle, style]}
+          placeholderTextColor={COLORS.textLight}
+          secureTextEntry={isPassword ? hidden : false}
+          {...props}
+        />
+        {isPassword && (
+          <TouchableOpacity
+            onPress={() => setHidden((h) => !h)}
+            style={styles.eyeButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons
+              name={hidden ? 'eye-off-outline' : 'eye-outline'}
+              size={20}
+              color={COLORS.textLight}
+            />
+          </TouchableOpacity>
+        )}
+      </View>
+      {error && <Text style={styles.error}>{error}</Text>}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: SPACING.md,
+  },
+  label: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.xs,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: BORDER_RADIUS.md,
+  },
+  input: {
+    flex: 1,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
+    fontSize: FONT_SIZES.md,
+    color: COLORS.textPrimary,
+  },
+  inputWithToggle: {
+    paddingRight: 0,
+  },
+  inputError: {
+    borderColor: COLORS.error,
+  },
+  eyeButton: {
+    paddingHorizontal: SPACING.md,
+  },
+  error: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.error,
+    marginTop: SPACING.xs,
+  },
+});

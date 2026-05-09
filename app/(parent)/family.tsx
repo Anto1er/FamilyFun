@@ -1,0 +1,182 @@
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
+import { useAuthStore } from '@/stores/authStore';
+import { useFamilyStore } from '@/stores/familyStore';
+import { Card } from '@/components/ui/Card';
+import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '@/lib/constants';
+
+export default function FamilyScreen() {
+  const { t } = useTranslation();
+  const profile = useAuthStore((s) => s.profile);
+  const { family, members, fetchFamily, fetchMembers } = useFamilyStore();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const familyId = profile?.family_id;
+
+  useEffect(() => {
+    if (familyId) {
+      fetchFamily(familyId);
+      fetchMembers(familyId);
+    }
+  }, [familyId]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    if (familyId) {
+      await Promise.all([fetchFamily(familyId), fetchMembers(familyId)]);
+    }
+    setRefreshing(false);
+  };
+
+  return (
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+    >
+      {/* Family Name */}
+      {family && (
+        <Card style={styles.familyCard}>
+          <Ionicons name="home" size={32} color={COLORS.primary} />
+          <Text style={styles.familyName}>{family.name}</Text>
+        </Card>
+      )}
+
+      {/* Invite Code */}
+      <Card style={styles.codeCard}>
+        <Text style={styles.codeLabel}>{t('family.inviteCode')}</Text>
+        <Text style={styles.codeValue}>{family?.invite_code ?? '...'}</Text>
+        <Text style={styles.codeHint}>{t('family.shareCode')}</Text>
+      </Card>
+
+      {/* Members */}
+      <Text style={styles.sectionTitle}>{t('family.members')}</Text>
+      {members.length > 0 ? (
+        members.map((member) => (
+          <Card key={member.id} style={styles.memberCard}>
+            <View style={styles.memberRow}>
+              <View style={styles.avatar}>
+                <Ionicons
+                  name={member.role === 'parent' ? 'people' : 'happy'}
+                  size={24}
+                  color={member.role === 'parent' ? COLORS.primary : COLORS.secondary}
+                />
+              </View>
+              <View style={styles.memberInfo}>
+                <Text style={styles.memberName}>{member.display_name}</Text>
+                <Text style={styles.memberRole}>
+                  {member.role === 'parent' ? t('family.parent') : t('family.child')}
+                  {member.role === 'child' ? ` - ${member.points_balance} pts` : ''}
+                </Text>
+              </View>
+              {member.id === profile?.id && (
+                <View style={styles.youBadge}>
+                  <Text style={styles.youBadgeText}>Vous</Text>
+                </View>
+              )}
+            </View>
+          </Card>
+        ))
+      ) : (
+        <Card style={styles.emptyCard}>
+          <Text style={styles.emptyText}>{t('family.noMembers')}</Text>
+        </Card>
+      )}
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  content: {
+    padding: SPACING.lg,
+  },
+  familyCard: {
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+  },
+  familyName: {
+    fontSize: FONT_SIZES.xl,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginTop: SPACING.sm,
+  },
+  codeCard: {
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+    backgroundColor: '#F0EEFF',
+  },
+  codeLabel: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.xs,
+  },
+  codeValue: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: COLORS.primary,
+    letterSpacing: 6,
+  },
+  codeHint: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textSecondary,
+    marginTop: SPACING.sm,
+  },
+  sectionTitle: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.md,
+  },
+  memberCard: {
+    marginBottom: SPACING.sm,
+  },
+  memberRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  memberInfo: {
+    flex: 1,
+    marginLeft: SPACING.md,
+  },
+  memberName: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  memberRole: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
+  youBadge: {
+    backgroundColor: COLORS.primary,
+    borderRadius: BORDER_RADIUS.sm,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+  },
+  youBadgeText: {
+    color: '#FFF',
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '600',
+  },
+  emptyCard: {
+    alignItems: 'center',
+  },
+  emptyText: {
+    color: COLORS.textSecondary,
+  },
+});
