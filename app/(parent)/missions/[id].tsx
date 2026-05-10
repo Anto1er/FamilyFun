@@ -61,7 +61,11 @@ export default function ParentMissionDetailScreen() {
         </Text>
       </View>
       {item.note && <Text style={styles.note}>{item.note}</Text>}
-      {item.status === 'pending' ? (
+      {item.status === 'claimed' ? (
+        <Text style={[styles.statusText, { color: COLORS.primary }]}>
+          {t('missions.claimed')}
+        </Text>
+      ) : item.status === 'pending' ? (
         <View style={styles.actions}>
           <Button
             title={t('missions.approved')}

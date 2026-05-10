@@ -24,6 +24,7 @@ export default function ParentDashboard() {
   const familyId = profile?.family_id;
   const children = members.filter((m) => m.role === 'child');
   const pendingSubmissions = submissions.filter((s) => s.status === 'pending');
+  const claimedSubmissions = submissions.filter((s) => s.status === 'claimed');
   const activeMissions = missions.filter((m) => m.status === 'active');
   const pendingGifts = gifts.filter((g) => g.status === 'pending');
 
@@ -90,6 +91,37 @@ export default function ParentDashboard() {
           </View>
         </Card>
       </Touchable>
+
+      {claimedSubmissions.length > 0 && (
+        <Touchable onPress={() => router.push('/(parent)/missions')}>
+          <Card style={styles.claimedCard}>
+            <View style={styles.missionRow}>
+              <Ionicons name="hand-left" size={22} color={COLORS.primary} />
+              <View style={styles.missionInfo}>
+                <Text style={styles.claimedTitle}>
+                  {claimedSubmissions.length} {t('dashboard.claimedMissions').toLowerCase()}
+                </Text>
+                {claimedSubmissions.slice(0, 3).map((cs) => {
+                  const child = members.find((m) => m.id === cs.child_id);
+                  const mission = missions.find((m) => m.id === cs.mission_id);
+                  if (!child || !mission) return null;
+                  return (
+                    <Text key={cs.id} style={styles.claimedDetail}>
+                      {child.display_name} — {mission.title}
+                    </Text>
+                  );
+                })}
+                {claimedSubmissions.length > 3 && (
+                  <Text style={styles.claimedDetail}>
+                    +{claimedSubmissions.length - 3} ...
+                  </Text>
+                )}
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={COLORS.textLight} />
+            </View>
+          </Card>
+        </Touchable>
+      )}
 
       <Touchable
         onPress={() => router.push('/(parent)/missions/create')}
@@ -182,6 +214,20 @@ const styles = StyleSheet.create({
   missionPending: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.warning,
+    marginTop: 2,
+  },
+  claimedCard: {
+    marginBottom: SPACING.sm,
+    backgroundColor: '#EEF0FF',
+  },
+  claimedTitle: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: '600',
+    color: COLORS.primary,
+  },
+  claimedDetail: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textSecondary,
     marginTop: 2,
   },
   addCard: {

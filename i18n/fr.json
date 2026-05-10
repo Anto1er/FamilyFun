@@ -32,7 +32,7 @@
   },
   "family": {
     "title": "Ma Famille",
-    "create": "Creer une famille",
+    "create": "Créer une famille",
     "join": "Rejoindre une famille",
     "familyName": "Nom de la famille",
     "inviteCode": "Code d'invitation",
@@ -56,7 +56,7 @@
   "missions": {
     "title": "Missions",
     "available": "Missions disponibles",
-    "create": "Creer une mission",
+    "create": "Créer une mission",
     "missionTitle": "Titre de la mission",
     "description": "Description",
     "pointsReward": "Points de recompense",
@@ -71,7 +71,14 @@
     "note": "Ajouter un commentaire",
     "noMissions": "Aucune mission disponible",
     "pendingSubmissions": "Soumissions en attente",
-    "edit": "Modifier la mission"
+    "edit": "Modifier la mission",
+    "claim": "Je prends cette mission",
+    "claimed": "Mission prise",
+    "claimedBy": "Prise par {{name}}",
+    "complete": "Mission accomplie !",
+    "assignTo": "Attribuer a",
+    "everyone": "Tout le monde",
+    "noOne": "Personne"
   },
   "gifts": {
     "title": "Liste de souhaits",
@@ -100,7 +107,8 @@
     "pointsBalance": "Mes points",
     "recentActivity": "Activite recente",
     "children": "Enfants",
-    "pendingValidations": "A valider"
+    "pendingValidations": "A valider",
+    "claimedMissions": "Missions prises"
   },
   "history": {
     "title": "Historique",

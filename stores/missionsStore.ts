@@ -8,11 +8,13 @@ interface MissionsState {
   loading: boolean;
 
   fetchMissions: (familyId: string) => Promise<void>;
-  createMission: (mission: Omit<Mission, 'id' | 'created_at' | 'updated_at' | 'status'>) => Promise<void>;
+  createMission: (mission: Omit<Mission, 'id' | 'created_at' | 'updated_at' | 'status'>) => Promise<string>;
   updateMission: (missionId: string, updates: Partial<Pick<Mission, 'title' | 'description' | 'points_reward' | 'recurrence'>>) => Promise<void>;
   archiveMission: (missionId: string) => Promise<void>;
   fetchSubmissions: (familyId: string) => Promise<void>;
+  claimMission: (missionId: string, childId: string, familyId: string) => Promise<void>;
   submitMission: (missionId: string, childId: string, familyId: string, note?: string) => Promise<void>;
+  completeClaim: (submissionId: string, familyId: string, note?: string) => Promise<void>;
   validateSubmission: (submissionId: string, status: 'approved' | 'rejected', validatedBy: string) => Promise<void>;
 }
 
@@ -39,9 +41,10 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
   },
 
   createMission: async (mission) => {
-    const { error } = await (supabase.from('missions') as any).insert(mission);
+    const { data, error } = await (supabase.from('missions') as any).insert(mission).select('id').single();
     if (error) throw error;
     await get().fetchMissions(mission.family_id);
+    return data.id as string;
   },
 
   updateMission: async (missionId, updates) => {
@@ -80,6 +83,17 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
     set({ submissions: (data as MissionSubmission[]) ?? [] });
   },
 
+  claimMission: async (missionId, childId, familyId) => {
+    const { error } = await (supabase.from('mission_submissions') as any).insert({
+      mission_id: missionId,
+      child_id: childId,
+      family_id: familyId,
+      status: 'claimed',
+    });
+    if (error) throw error;
+    await get().fetchSubmissions(familyId);
+  },
+
   submitMission: async (missionId, childId, familyId, note) => {
     const { error } = await (supabase.from('mission_submissions') as any).insert({
       mission_id: missionId,
@@ -87,6 +101,17 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
       family_id: familyId,
       note: note ?? null,
     });
+    if (error) throw error;
+    await get().fetchSubmissions(familyId);
+  },
+
+  completeClaim: async (submissionId, familyId, note) => {
+    const { error } = await (supabase.from('mission_submissions') as any)
+      .update({
+        status: 'pending',
+        note: note ?? null,
+      })
+      .eq('id', submissionId);
     if (error) throw error;
     await get().fetchSubmissions(familyId);
   },

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@/stores/authStore';
 import { useMissionsStore } from '@/stores/missionsStore';
+import { useFamilyStore } from '@/stores/familyStore';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -17,6 +18,7 @@ export default function ParentMissionsScreen() {
   const router = useRouter();
   const profile = useAuthStore((s) => s.profile);
   const { missions, submissions, loading, fetchMissions, fetchSubmissions } = useMissionsStore();
+  const { members } = useFamilyStore();
   const [refreshing, setRefreshing] = useState(false);
 
   const familyId = profile?.family_id;
@@ -39,8 +41,15 @@ export default function ParentMissionsScreen() {
   const getPendingCount = (missionId: string) =>
     submissions.filter((s) => s.mission_id === missionId && s.status === 'pending').length;
 
+  const getClaimedChildren = (missionId: string) =>
+    submissions
+      .filter((s) => s.mission_id === missionId && s.status === 'claimed')
+      .map((s) => members.find((m) => m.id === s.child_id)?.display_name)
+      .filter(Boolean);
+
   const renderMission = ({ item }: { item: Mission }) => {
     const pendingCount = getPendingCount(item.id);
+    const claimedNames = getClaimedChildren(item.id);
     return (
       <Touchable onPress={() => router.push(`/(parent)/missions/${item.id}`)}>
         <Card style={styles.missionCard}>
@@ -48,6 +57,11 @@ export default function ParentMissionsScreen() {
             <View style={styles.missionInfo}>
               <Text style={styles.missionTitle}>{item.title}</Text>
               <Text style={styles.missionPoints}>+{item.points_reward} pts</Text>
+              {claimedNames.length > 0 && (
+                <Text style={styles.claimedText}>
+                  {t('missions.claimedBy', { name: claimedNames.join(', ') })}
+                </Text>
+              )}
             </View>
             {pendingCount > 0 && (
               <View style={styles.badge}>
@@ -113,6 +127,11 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     color: COLORS.warning,
     fontWeight: '500',
+    marginTop: 2,
+  },
+  claimedText: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.primary,
     marginTop: 2,
   },
   badge: {

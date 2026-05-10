@@ -71,7 +71,14 @@
     "note": "Add a comment",
     "noMissions": "No missions available",
     "pendingSubmissions": "Pending submissions",
-    "edit": "Edit mission"
+    "edit": "Edit mission",
+    "claim": "I'll take this mission",
+    "claimed": "Mission claimed",
+    "claimedBy": "Claimed by {{name}}",
+    "complete": "Mission complete!",
+    "assignTo": "Assign to",
+    "everyone": "Everyone",
+    "noOne": "No one"
   },
   "gifts": {
     "title": "Wishlist",
@@ -100,7 +107,8 @@
     "pointsBalance": "My points",
     "recentActivity": "Recent activity",
     "children": "Children",
-    "pendingValidations": "To validate"
+    "pendingValidations": "To validate",
+    "claimedMissions": "Claimed missions"
   },
   "history": {
     "title": "History",

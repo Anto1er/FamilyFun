@@ -15,20 +15,30 @@ export default function ChildMissionsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const profile = useAuthStore((s) => s.profile);
-  const { missions, loading, fetchMissions } = useMissionsStore();
+  const { missions, submissions, loading, fetchMissions, fetchSubmissions } = useMissionsStore();
   const [refreshing, setRefreshing] = React.useState(false);
 
   const familyId = profile?.family_id;
 
   useEffect(() => {
-    if (familyId) fetchMissions(familyId);
+    if (familyId) {
+      fetchMissions(familyId);
+      fetchSubmissions(familyId);
+    }
   }, [familyId]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    if (familyId) await fetchMissions(familyId);
+    if (familyId) {
+      await Promise.all([fetchMissions(familyId), fetchSubmissions(familyId)]);
+    }
     setRefreshing(false);
   };
+
+  const isClaimed = (missionId: string) =>
+    submissions.some(
+      (s) => s.mission_id === missionId && s.child_id === profile?.id && s.status === 'claimed'
+    );
 
   const renderMission = ({ item }: { item: Mission }) => (
     <Touchable onPress={() => router.push(`/(child)/missions/${item.id}`)}>
@@ -48,10 +58,18 @@ export default function ChildMissionsScreen() {
             <Ionicons name="star" size={12} color={COLORS.warning} />
           </View>
         </View>
-        <View style={styles.recurrenceBadge}>
-          <Text style={styles.recurrenceText}>
-            {t(`missions.${item.recurrence === 'one_time' ? 'oneTime' : item.recurrence}`)}
-          </Text>
+        <View style={styles.badgeRow}>
+          <View style={styles.recurrenceBadge}>
+            <Text style={styles.recurrenceText}>
+              {t(`missions.${item.recurrence === 'one_time' ? 'oneTime' : item.recurrence}`)}
+            </Text>
+          </View>
+          {isClaimed(item.id) && (
+            <View style={styles.claimedBadge}>
+              <Ionicons name="hand-left" size={12} color={COLORS.primary} />
+              <Text style={styles.claimedText}>{t('missions.claimed')}</Text>
+            </View>
+          )}
         </View>
       </Card>
     </Touchable>
@@ -121,8 +139,6 @@ const styles = StyleSheet.create({
     color: COLORS.warning,
   },
   recurrenceBadge: {
-    alignSelf: 'flex-start',
-    marginTop: SPACING.sm,
     backgroundColor: COLORS.background,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 2,
@@ -131,5 +147,25 @@ const styles = StyleSheet.create({
   recurrenceText: {
     fontSize: FONT_SIZES.xs,
     color: COLORS.textSecondary,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginTop: SPACING.sm,
+  },
+  claimedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#EEF0FF',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: BORDER_RADIUS.sm,
+  },
+  claimedText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '600',
+    color: COLORS.primary,
   },
 });

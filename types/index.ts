@@ -3,7 +3,7 @@ export type UserRole = 'parent' | 'child';
 export type MissionRecurrence = 'one_time' | 'daily' | 'weekly';
 export type MissionStatus = 'active' | 'archived';
 export type GiftStatus = 'pending_approval' | 'approved' | 'rejected' | 'redeemed';
-export type SubmissionStatus = 'pending' | 'approved' | 'rejected';
+export type SubmissionStatus = 'claimed' | 'pending' | 'approved' | 'rejected';
 export type TransactionType = 'mission_reward' | 'gift_redemption' | 'manual_adjustment';
 export type NotificationType =
   | 'mission_submitted'

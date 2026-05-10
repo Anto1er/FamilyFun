@@ -113,7 +113,7 @@ export interface Database {
           mission_id: string;
           child_id: string;
           family_id: string;
-          status: 'pending' | 'approved' | 'rejected';
+          status: 'claimed' | 'pending' | 'approved' | 'rejected';
           note: string | null;
           validated_by: string | null;
           validated_at: string | null;
@@ -124,7 +124,7 @@ export interface Database {
           mission_id: string;
           child_id: string;
           family_id: string;
-          status?: 'pending' | 'approved' | 'rejected';
+          status?: 'claimed' | 'pending' | 'approved' | 'rejected';
           note?: string | null;
           validated_by?: string | null;
           validated_at?: string | null;

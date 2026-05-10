@@ -15,7 +15,7 @@ export default function MissionDetailScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const profile = useAuthStore((s) => s.profile);
-  const { missions, submissions, submitMission } = useMissionsStore();
+  const { missions, submissions, claimMission, completeClaim } = useMissionsStore();
 
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,6 +24,7 @@ export default function MissionDetailScreen() {
   const mySubmissions = submissions.filter(
     (s) => s.mission_id === id && s.child_id === profile?.id
   );
+  const claimedSubmission = mySubmissions.find((s) => s.status === 'claimed');
   const hasPendingSubmission = mySubmissions.some((s) => s.status === 'pending');
 
   if (!mission) {
@@ -34,18 +35,75 @@ export default function MissionDetailScreen() {
     );
   }
 
-  const handleSubmit = async () => {
+  const handleClaim = async () => {
     if (!profile?.family_id) return;
     setLoading(true);
     try {
-      await submitMission(mission.id, profile.id, profile.family_id, note || undefined);
-      Alert.alert(t('missions.submit'), t('missions.submitted'));
-      router.back();
-    } catch (error) {
-      Alert.alert(t('common.error'), String(error));
+      await claimMission(mission.id, profile.id, profile.family_id);
+    } catch (error: any) {
+      Alert.alert(t('common.error'), error?.message || JSON.stringify(error));
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleComplete = async () => {
+    if (!profile?.family_id || !claimedSubmission) return;
+    setLoading(true);
+    try {
+      await completeClaim(claimedSubmission.id, profile.family_id, note || undefined);
+      Alert.alert(t('missions.submit'), t('missions.submitted'));
+      router.back();
+    } catch (error: any) {
+      Alert.alert(t('common.error'), error?.message || JSON.stringify(error));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderActions = () => {
+    if (hasPendingSubmission) {
+      return (
+        <Card style={styles.pendingCard}>
+          <Ionicons name="hourglass" size={24} color={COLORS.warning} />
+          <Text style={styles.pendingText}>{t('missions.submitted')}</Text>
+        </Card>
+      );
+    }
+
+    if (claimedSubmission) {
+      return (
+        <View>
+          <Card style={styles.claimedCard}>
+            <Ionicons name="hand-left" size={24} color={COLORS.primary} />
+            <Text style={styles.claimedText}>{t('missions.claimed')}</Text>
+          </Card>
+          <View style={styles.submitSection}>
+            <Input
+              label={t('missions.note')}
+              value={note}
+              onChangeText={setNote}
+              multiline
+              numberOfLines={3}
+              placeholder="..."
+            />
+            <Button
+              title={t('missions.complete')}
+              onPress={handleComplete}
+              loading={loading}
+            />
+          </View>
+        </View>
+      );
+    }
+
+    return (
+      <Button
+        title={t('missions.claim')}
+        onPress={handleClaim}
+        loading={loading}
+      />
+    );
   };
 
   return (
@@ -68,28 +126,7 @@ export default function MissionDetailScreen() {
         </View>
       </Card>
 
-      {hasPendingSubmission ? (
-        <Card style={styles.pendingCard}>
-          <Ionicons name="hourglass" size={24} color={COLORS.warning} />
-          <Text style={styles.pendingText}>{t('missions.submitted')}</Text>
-        </Card>
-      ) : (
-        <View style={styles.submitSection}>
-          <Input
-            label={t('missions.note')}
-            value={note}
-            onChangeText={setNote}
-            multiline
-            numberOfLines={3}
-            placeholder="..."
-          />
-          <Button
-            title={t('missions.submit')}
-            onPress={handleSubmit}
-            loading={loading}
-          />
-        </View>
-      )}
+      {renderActions()}
     </View>
   );
 }
@@ -145,5 +182,16 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.md,
     fontWeight: '500',
     color: COLORS.warning,
+  },
+  claimedCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    backgroundColor: '#EEF0FF',
+  },
+  claimedText: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: '500',
+    color: COLORS.primary,
   },
 });

@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Alert, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@/stores/authStore';
 import { useMissionsStore } from '@/stores/missionsStore';
+import { useFamilyStore } from '@/stores/familyStore';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Touchable } from '@/components/ui/Touchable';
@@ -14,12 +16,16 @@ export default function CreateMissionScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const profile = useAuthStore((s) => s.profile);
-  const createMission = useMissionsStore((s) => s.createMission);
+  const { createMission, claimMission } = useMissionsStore();
+  const { members } = useFamilyStore();
+
+  const children = members.filter((m) => m.role === 'child');
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [points, setPoints] = useState('');
   const [recurrence, setRecurrence] = useState<MissionRecurrence>('one_time');
+  const [assignedChildId, setAssignedChildId] = useState<string>('everyone');
   const [loading, setLoading] = useState(false);
 
   const recurrenceOptions: { key: MissionRecurrence; label: string }[] = [
@@ -32,7 +38,7 @@ export default function CreateMissionScreen() {
     if (!title || !points || !profile?.family_id) return;
     setLoading(true);
     try {
-      await createMission({
+      const missionId = await createMission({
         family_id: profile.family_id,
         created_by: profile.id,
         title,
@@ -40,9 +46,18 @@ export default function CreateMissionScreen() {
         points_reward: parseInt(points, 10),
         recurrence,
       });
+
+      if (assignedChildId === 'everyone') {
+        for (const child of children) {
+          await claimMission(missionId, child.id, profile.family_id);
+        }
+      } else if (assignedChildId !== 'none') {
+        await claimMission(missionId, assignedChildId, profile.family_id);
+      }
+
       router.back();
-    } catch (error) {
-      Alert.alert(t('common.error'), String(error));
+    } catch (error: any) {
+      Alert.alert(t('common.error'), error?.message || JSON.stringify(error));
     } finally {
       setLoading(false);
     }
@@ -74,20 +89,20 @@ export default function CreateMissionScreen() {
       />
 
       <Text style={styles.label}>{t('missions.recurrence')}</Text>
-      <View style={styles.recurrenceRow}>
+      <View style={styles.chipRow}>
         {recurrenceOptions.map((option) => (
           <Touchable
             key={option.key}
             style={[
-              styles.recurrenceChip,
-              recurrence === option.key && styles.recurrenceChipActive,
+              styles.chip,
+              recurrence === option.key && styles.chipActive,
             ]}
             onPress={() => setRecurrence(option.key)}
           >
             <Text
               style={[
-                styles.recurrenceText,
-                recurrence === option.key && styles.recurrenceTextActive,
+                styles.chipText,
+                recurrence === option.key && styles.chipTextActive,
               ]}
             >
               {option.label}
@@ -95,6 +110,65 @@ export default function CreateMissionScreen() {
           </Touchable>
         ))}
       </View>
+
+      {children.length > 0 && (
+        <>
+          <Text style={styles.label}>{t('missions.assignTo')}</Text>
+          <View style={styles.chipRow}>
+            <Touchable
+              style={[
+                styles.chip,
+                assignedChildId === 'everyone' && styles.chipActive,
+              ]}
+              onPress={() => setAssignedChildId('everyone')}
+            >
+              <Text
+                style={[
+                  styles.chipText,
+                  assignedChildId === 'everyone' && styles.chipTextActive,
+                ]}
+              >
+                {t('missions.everyone')}
+              </Text>
+            </Touchable>
+            <Touchable
+              style={[
+                styles.chip,
+                assignedChildId === 'none' && styles.chipActive,
+              ]}
+              onPress={() => setAssignedChildId('none')}
+            >
+              <Text
+                style={[
+                  styles.chipText,
+                  assignedChildId === 'none' && styles.chipTextActive,
+                ]}
+              >
+                {t('missions.noOne')}
+              </Text>
+            </Touchable>
+            {children.map((child) => (
+              <Touchable
+                key={child.id}
+                style={[
+                  styles.chip,
+                  assignedChildId === child.id && styles.chipActive,
+                ]}
+                onPress={() => setAssignedChildId(child.id)}
+              >
+                <Text
+                  style={[
+                    styles.chipText,
+                    assignedChildId === child.id && styles.chipTextActive,
+                  ]}
+                >
+                  {child.display_name}
+                </Text>
+              </Touchable>
+            ))}
+          </View>
+        </>
+      )}
 
       <Button
         title={t('common.save')}
@@ -121,12 +195,13 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     marginBottom: SPACING.sm,
   },
-  recurrenceRow: {
+  chipRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: SPACING.sm,
     marginBottom: SPACING.lg,
   },
-  recurrenceChip: {
+  chip: {
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: BORDER_RADIUS.full,
@@ -134,15 +209,15 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     backgroundColor: COLORS.surface,
   },
-  recurrenceChipActive: {
+  chipActive: {
     backgroundColor: COLORS.primary,
     borderColor: COLORS.primary,
   },
-  recurrenceText: {
+  chipText: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.textSecondary,
   },
-  recurrenceTextActive: {
+  chipTextActive: {
     color: '#fff',
     fontWeight: '600',
   },
