@@ -19,6 +19,7 @@ export default function ChildLayout() {
       <Tabs.Screen
         name="index"
         options={{
+          headerShown: false,
           title: t('dashboard.childTitle'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />

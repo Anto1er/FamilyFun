@@ -98,6 +98,8 @@
     "setCost": "Set cost",
     "noGifts": "No gifts in the list",
     "insufficientPoints": "Not enough points",
+    "deleteGift": "Delete wish",
+    "deleteGiftConfirm": "Do you really want to delete this wish?",
     "selectChild": "Who is this for?",
     "wholeFamily": "Whole family"
   },
@@ -108,7 +110,13 @@
     "recentActivity": "Recent activity",
     "children": "Children",
     "pendingValidations": "To validate",
-    "claimedMissions": "Claimed missions"
+    "claimedMissions": "Claimed missions",
+    "welcome": "Hello {{name}}",
+    "familyOverview": "Family {{name}}",
+    "activeMissions": "active",
+    "seeAll": "See all",
+    "noPendingActions": "All caught up!",
+    "childPoints": "{{points}} pts"
   },
   "history": {
     "title": "History",

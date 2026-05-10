@@ -14,7 +14,7 @@ export default function GiftDetailScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const profile = useAuthStore((s) => s.profile);
-  const { gifts, redeemGift } = useGiftsStore();
+  const { gifts, redeemGift, deleteGift } = useGiftsStore();
   const fetchProfile = useAuthStore((s) => s.fetchProfile);
 
   const [loading, setLoading] = useState(false);
@@ -50,6 +50,24 @@ export default function GiftDetailScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDelete = () => {
+    Alert.alert(t('gifts.deleteGift'), t('gifts.deleteGiftConfirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('common.delete'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteGift(gift.id);
+            router.back();
+          } catch (error) {
+            Alert.alert(t('common.error'), String(error));
+          }
+        },
+      },
+    ]);
   };
 
   return (
@@ -94,6 +112,15 @@ export default function GiftDetailScreen() {
           <Ionicons name="checkmark-circle" size={24} color={COLORS.success} />
           <Text style={styles.redeemedText}>{t('gifts.redeemed')}</Text>
         </Card>
+      )}
+
+      {gift.status !== 'redeemed' && (
+        <Button
+          title={t('gifts.deleteGift')}
+          onPress={handleDelete}
+          variant="danger"
+          style={styles.button}
+        />
       )}
     </View>
   );

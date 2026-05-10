@@ -3,18 +3,23 @@ import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '@/stores/authStore';
 import { useFamilyStore } from '@/stores/familyStore';
 import { useMissionsStore } from '@/stores/missionsStore';
 import { useGiftsStore } from '@/stores/giftsStore';
 import { Card } from '@/components/ui/Card';
 import { Touchable } from '@/components/ui/Touchable';
-import { COLORS, SPACING, FONT_SIZES } from '@/lib/constants';
+import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '@/lib/constants';
 import { Profile } from '@/types';
+
+const CHILD_COLORS = ['#6C63FF', '#FF6584', '#4CAF50', '#FF9800', '#00BCD4', '#9C27B0'];
 
 export default function ParentDashboard() {
   const { t } = useTranslation();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const profile = useAuthStore((s) => s.profile);
   const { family, members, fetchFamily, fetchMembers } = useFamilyStore();
   const { missions, submissions, fetchMissions, fetchSubmissions } = useMissionsStore();
@@ -26,7 +31,7 @@ export default function ParentDashboard() {
   const pendingSubmissions = submissions.filter((s) => s.status === 'pending');
   const claimedSubmissions = submissions.filter((s) => s.status === 'claimed');
   const activeMissions = missions.filter((m) => m.status === 'active');
-  const pendingGifts = gifts.filter((g) => g.status === 'pending');
+  const pendingGifts = gifts.filter((g) => g.status === 'pending_approval');
 
   useEffect(() => {
     if (familyId) {
@@ -58,111 +63,178 @@ export default function ParentDashboard() {
       contentContainerStyle={styles.content}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      {/* Pending Validations */}
+      {/* Welcome Header */}
+      <LinearGradient
+        colors={['#6C63FF', '#8B85FF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.headerGradient, { paddingTop: insets.top + SPACING.lg }]}
+      >
+        <View style={styles.headerContent}>
+          <View style={styles.headerTextBlock}>
+            <Text style={styles.welcomeText}>
+              {t('dashboard.welcome', { name: profile?.display_name ?? '' })}
+            </Text>
+            {family?.name && (
+              <Text style={styles.familyName}>
+                {(() => {
+                  const prefix = t('dashboard.familyOverview', { name: '' }).trim();
+                  const name = family.name;
+                  if (name.toLowerCase().startsWith(prefix.toLowerCase())) {
+                    return name;
+                  }
+                  return t('dashboard.familyOverview', { name });
+                })()}
+              </Text>
+            )}
+          </View>
+          <View style={styles.headerStats}>
+            <View style={styles.headerStatItem}>
+              <Text style={styles.headerStatValue}>{children.length}</Text>
+              <Text style={styles.headerStatLabel}>{t('dashboard.children')}</Text>
+            </View>
+            <View style={styles.headerStatDivider} />
+            <View style={styles.headerStatItem}>
+              <Text style={styles.headerStatValue}>{activeMissions.length}</Text>
+              <Text style={styles.headerStatLabel}>{t('missions.title')}</Text>
+            </View>
+          </View>
+        </View>
+      </LinearGradient>
+
+      {/* Pending Validations Alert */}
       {pendingSubmissions.length > 0 && (
         <Touchable onPress={() => router.push('/(parent)/missions')}>
           <Card style={styles.alertCard}>
-            <Ionicons name="alert-circle" size={24} color={COLORS.warning} />
-            <Text style={styles.alertText}>
-              {pendingSubmissions.length} {t('dashboard.pendingValidations').toLowerCase()}
-            </Text>
+            <View style={styles.alertIconContainer}>
+              <Ionicons name="alert-circle" size={20} color="#FFF" />
+            </View>
+            <View style={styles.alertContent}>
+              <Text style={styles.alertTitle}>
+                {pendingSubmissions.length} {t('dashboard.pendingValidations').toLowerCase()}
+              </Text>
+              <Text style={styles.alertSubtitle}>{t('dashboard.seeAll')}</Text>
+            </View>
             <Ionicons name="chevron-forward" size={20} color={COLORS.warning} />
           </Card>
         </Touchable>
       )}
 
       {/* Missions Section */}
-      <Text style={styles.sectionTitle}>{t('missions.title')}</Text>
-      <Touchable
-        onPress={() => router.push('/(parent)/missions')}
-      >
-        <Card style={styles.missionCard}>
-          <View style={styles.missionRow}>
-            <Ionicons name="rocket" size={28} color={COLORS.primary} />
-            <View style={styles.missionInfo}>
-              <Text style={styles.missionValue}>{activeMissions.length} {t('missions.available').toLowerCase()}</Text>
-              {pendingSubmissions.length > 0 && (
-                <Text style={styles.missionPending}>
-                  {pendingSubmissions.length} {t('dashboard.pendingValidations').toLowerCase()}
-                </Text>
-              )}
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>{t('missions.title')}</Text>
+      </View>
+
+      <View style={styles.missionCardsRow}>
+        <Touchable
+          style={{ flex: 1 }}
+          onPress={() => router.push('/(parent)/missions')}
+        >
+          <Card style={styles.missionStatCard}>
+            <View style={styles.missionStatIconContainer}>
+              <Ionicons name="rocket" size={22} color={COLORS.primary} />
             </View>
-            <Ionicons name="chevron-forward" size={20} color={COLORS.textLight} />
-          </View>
-        </Card>
-      </Touchable>
+            <Text style={styles.missionStatValue}>{activeMissions.length}</Text>
+            <Text style={styles.missionStatLabel}>{t('dashboard.activeMissions')}</Text>
+          </Card>
+        </Touchable>
+
+        <Touchable
+          style={{ flex: 1 }}
+          onPress={() => router.push('/(parent)/missions/create')}
+        >
+          <Card style={styles.createMissionCard}>
+            <View style={styles.createMissionIconContainer}>
+              <Ionicons name="add" size={24} color="#FFF" />
+            </View>
+            <Text style={styles.createMissionText}>{t('missions.create')}</Text>
+          </Card>
+        </Touchable>
+      </View>
 
       {claimedSubmissions.length > 0 && (
         <Touchable onPress={() => router.push('/(parent)/missions')}>
           <Card style={styles.claimedCard}>
-            <View style={styles.missionRow}>
-              <Ionicons name="hand-left" size={22} color={COLORS.primary} />
-              <View style={styles.missionInfo}>
-                <Text style={styles.claimedTitle}>
+            <View style={styles.claimedHeader}>
+              <View style={styles.claimedBadge}>
+                <Ionicons name="hand-left" size={14} color={COLORS.primary} />
+                <Text style={styles.claimedBadgeText}>
                   {claimedSubmissions.length} {t('dashboard.claimedMissions').toLowerCase()}
                 </Text>
-                {claimedSubmissions.slice(0, 3).map((cs) => {
-                  const child = members.find((m) => m.id === cs.child_id);
-                  const mission = missions.find((m) => m.id === cs.mission_id);
-                  if (!child || !mission) return null;
-                  return (
-                    <Text key={cs.id} style={styles.claimedDetail}>
-                      {child.display_name} — {mission.title}
-                    </Text>
-                  );
-                })}
-                {claimedSubmissions.length > 3 && (
-                  <Text style={styles.claimedDetail}>
-                    +{claimedSubmissions.length - 3} ...
-                  </Text>
-                )}
               </View>
-              <Ionicons name="chevron-forward" size={20} color={COLORS.textLight} />
+              <Ionicons name="chevron-forward" size={18} color={COLORS.textLight} />
             </View>
+            {claimedSubmissions.slice(0, 3).map((cs) => {
+              const child = members.find((m) => m.id === cs.child_id);
+              const mission = missions.find((m) => m.id === cs.mission_id);
+              if (!child || !mission) return null;
+              return (
+                <View key={cs.id} style={styles.claimedItem}>
+                  <View style={styles.claimedDot} />
+                  <Text style={styles.claimedDetail} numberOfLines={1}>
+                    <Text style={styles.claimedChildName}>{child.display_name}</Text>
+                    {' — '}
+                    {mission.title}
+                  </Text>
+                </View>
+              );
+            })}
+            {claimedSubmissions.length > 3 && (
+              <Text style={styles.claimedMore}>
+                +{claimedSubmissions.length - 3} ...
+              </Text>
+            )}
           </Card>
         </Touchable>
       )}
 
-      <Touchable
-        onPress={() => router.push('/(parent)/missions/create')}
-      >
-        <Card style={styles.addCard}>
-          <Ionicons name="add-circle" size={24} color={COLORS.primary} />
-          <Text style={styles.addText}>{t('missions.create')}</Text>
-        </Card>
-      </Touchable>
-
       {/* Children Section */}
-      <Text style={styles.sectionTitle}>{t('dashboard.children')}</Text>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>{t('dashboard.children')}</Text>
+      </View>
+
       {children.length > 0 ? (
-        children.map((child) => (
-          <Touchable
-            key={child.id}
-            onPress={() => router.push(`/child-detail/${child.id}`)}
-          >
-            <Card style={styles.childCard}>
-              <View style={styles.childRow}>
-                <View style={styles.avatar}>
-                  <Ionicons name="happy" size={24} color={COLORS.primary} />
+        children.map((child, index) => {
+          const color = CHILD_COLORS[index % CHILD_COLORS.length];
+          const initial = (child.display_name ?? '?').charAt(0).toUpperCase();
+          return (
+            <Touchable
+              key={child.id}
+              onPress={() => router.push(`/child-detail/${child.id}`)}
+            >
+              <Card style={styles.childCard}>
+                <View style={styles.childRow}>
+                  <View style={[styles.avatar, { backgroundColor: color + '18' }]}>
+                    <Text style={[styles.avatarText, { color }]}>{initial}</Text>
+                  </View>
+                  <View style={styles.childInfo}>
+                    <Text style={styles.childName}>{child.display_name}</Text>
+                    <View style={styles.childPointsBadge}>
+                      <Ionicons name="star" size={12} color={COLORS.warning} />
+                      <Text style={styles.childPoints}>
+                        {t('dashboard.childPoints', { points: child.points_balance ?? 0 })}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.childChevron}>
+                    <Ionicons name="chevron-forward" size={18} color={COLORS.textLight} />
+                  </View>
                 </View>
-                <View style={styles.childInfo}>
-                  <Text style={styles.childName}>{child.display_name}</Text>
-                  <Text style={styles.childPoints}>{child.points_balance} pts</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color={COLORS.textLight} />
-              </View>
-            </Card>
-          </Touchable>
-        ))
+              </Card>
+            </Touchable>
+          );
+        })
       ) : (
         <Card style={styles.emptyCard}>
+          <Ionicons name="people-outline" size={40} color={COLORS.textLight} />
           <Text style={styles.emptyText}>{t('family.shareCode')}</Text>
           {family?.invite_code && (
-            <Text style={styles.inviteCode}>{family.invite_code}</Text>
+            <View style={styles.inviteCodeContainer}>
+              <Text style={styles.inviteCode}>{family.invite_code}</Text>
+            </View>
           )}
         </Card>
       )}
-
     </ScrollView>
   );
 }
@@ -173,88 +245,241 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   content: {
-    padding: SPACING.lg,
+    paddingBottom: SPACING.xl,
   },
+
+  // Header
+  headerGradient: {
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.xl,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
+  },
+  headerContent: {},
+  headerTextBlock: {
+    marginBottom: SPACING.lg,
+  },
+  welcomeText: {
+    fontSize: FONT_SIZES.xl,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  familyName: {
+    fontSize: FONT_SIZES.sm,
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: SPACING.xs,
+  },
+  headerStats: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.md,
+  },
+  headerStatItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerStatValue: {
+    fontSize: FONT_SIZES.xxl,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  headerStatLabel: {
+    fontSize: FONT_SIZES.xs,
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: 2,
+  },
+  headerStatDivider: {
+    width: 1,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    marginVertical: SPACING.xs,
+  },
+
+  // Alert
   alertCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.md,
     backgroundColor: '#FFF9E6',
-    marginBottom: SPACING.md,
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.warning,
   },
-  alertText: {
+  alertIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.warning,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  alertContent: {
     flex: 1,
+  },
+  alertTitle: {
     fontSize: FONT_SIZES.md,
-    fontWeight: '500',
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  alertSubtitle: {
+    fontSize: FONT_SIZES.xs,
     color: COLORS.warning,
+    marginTop: 2,
+  },
+
+  // Sections
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.md,
+    marginTop: SPACING.sm,
   },
   sectionTitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: '700',
     color: COLORS.textPrimary,
-    marginBottom: SPACING.md,
-    marginTop: SPACING.sm,
   },
-  missionCard: {
+
+  // Mission stat cards
+  missionCardsRow: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.md,
+  },
+  missionStatCard: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.lg,
+    flex: 1,
+  },
+  missionStatIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.primary + '14',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: SPACING.sm,
   },
-  missionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  missionInfo: {
-    flex: 1,
-    marginLeft: SPACING.md,
-  },
-  missionValue: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: '600',
+  missionStatValue: {
+    fontSize: FONT_SIZES.xxl,
+    fontWeight: '700',
     color: COLORS.textPrimary,
   },
-  missionPending: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.warning,
+  missionStatLabel: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textSecondary,
     marginTop: 2,
   },
-  claimedCard: {
-    marginBottom: SPACING.sm,
-    backgroundColor: '#EEF0FF',
+
+  // Create mission card
+  createMissionCard: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.lg,
+    flex: 1,
+    borderStyle: 'dashed',
+    borderWidth: 1.5,
+    borderColor: COLORS.primary + '40',
+    backgroundColor: COLORS.primary + '06',
+    shadowOpacity: 0,
+    elevation: 0,
   },
-  claimedTitle: {
-    fontSize: FONT_SIZES.md,
+  createMissionIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.sm,
+  },
+  createMissionText: {
+    fontSize: FONT_SIZES.sm,
     fontWeight: '600',
     color: COLORS.primary,
+    textAlign: 'center',
+  },
+
+  // Claimed missions
+  claimedCard: {
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
+    backgroundColor: '#F8F7FF',
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.primary,
+  },
+  claimedHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.sm,
+  },
+  claimedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: COLORS.primary + '14',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    borderRadius: BORDER_RADIUS.full,
+  },
+  claimedBadgeText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '600',
+    color: COLORS.primary,
+  },
+  claimedItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  claimedDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.primary,
+    marginRight: SPACING.sm,
   },
   claimedDetail: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.textSecondary,
-    marginTop: 2,
+    flex: 1,
   },
-  addCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.md,
-    marginBottom: SPACING.lg,
+  claimedChildName: {
+    fontWeight: '600',
+    color: COLORS.textPrimary,
   },
-  addText: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: '500',
-    color: COLORS.primary,
+  claimedMore: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textLight,
+    marginTop: 6,
+    marginLeft: 14,
   },
+
+  // Children
   childCard: {
-    marginBottom: SPACING.md,
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.sm,
   },
   childRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: COLORS.background,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  avatarText: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '700',
   },
   childInfo: {
     flex: 1,
@@ -265,24 +490,48 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.textPrimary,
   },
+  childPointsBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+  },
   childPoints: {
     fontSize: FONT_SIZES.sm,
     color: COLORS.textSecondary,
-    marginTop: 2,
   },
+  childChevron: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Empty state
   emptyCard: {
     alignItems: 'center',
+    marginHorizontal: SPACING.lg,
+    paddingVertical: SPACING.xl,
   },
   emptyText: {
     color: COLORS.textSecondary,
     textAlign: 'center',
+    marginTop: SPACING.md,
+  },
+  inviteCodeContainer: {
+    backgroundColor: COLORS.primary + '10',
+    borderRadius: BORDER_RADIUS.md,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    marginTop: SPACING.md,
   },
   inviteCode: {
     fontSize: FONT_SIZES.xxl,
     fontWeight: '700',
     color: COLORS.primary,
     textAlign: 'center',
-    marginTop: SPACING.md,
     letterSpacing: 4,
   },
 });

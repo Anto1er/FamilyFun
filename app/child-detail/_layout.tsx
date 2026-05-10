@@ -10,7 +10,7 @@ export default function ChildDetailLayout() {
       screenOptions={{
         headerStyle: { backgroundColor: COLORS.surface },
         headerTintColor: COLORS.textPrimary,
-        title: t('family.childDetail'),
+        title: '',
       }}
     />
   );

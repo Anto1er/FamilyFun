@@ -3,16 +3,19 @@ import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '@/stores/authStore';
 import { useMissionsStore } from '@/stores/missionsStore';
 import { useGiftsStore } from '@/stores/giftsStore';
 import { Card } from '@/components/ui/Card';
 import { Touchable } from '@/components/ui/Touchable';
-import { COLORS, SPACING, FONT_SIZES } from '@/lib/constants';
+import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '@/lib/constants';
 
 export default function ChildDashboard() {
   const { t } = useTranslation();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { profile, fetchProfile } = useAuthStore();
   const { missions, fetchMissions } = useMissionsStore();
   const { gifts, fetchGifts } = useGiftsStore();
@@ -38,6 +41,7 @@ export default function ChildDashboard() {
 
   const approvedGifts = gifts.filter((g) => g.status === 'approved' && g.child_id === profile?.id);
   const activeMissions = missions.filter((m) => m.status === 'active');
+  const points = profile?.points_balance ?? 0;
 
   return (
     <ScrollView
@@ -45,12 +49,22 @@ export default function ChildDashboard() {
       contentContainerStyle={styles.content}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      {/* Points Balance */}
-      <Card style={styles.pointsCard}>
-        <Ionicons name="star" size={32} color={COLORS.warning} />
-        <Text style={styles.pointsValue}>{profile?.points_balance ?? 0}</Text>
+      {/* Points Balance with Gradient */}
+      <LinearGradient
+        colors={['#FF9800', '#FFB74D']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.pointsGradient, { paddingTop: insets.top + SPACING.xl }]}
+      >
+        <Text style={styles.welcomeText}>
+          {t('dashboard.welcome', { name: profile?.display_name ?? '' })}
+        </Text>
+        <View style={styles.pointsIconContainer}>
+          <Ionicons name="star" size={28} color="#FFF" />
+        </View>
+        <Text style={styles.pointsValue}>{points}</Text>
         <Text style={styles.pointsLabel}>{t('dashboard.pointsBalance')}</Text>
-      </Card>
+      </LinearGradient>
 
       {/* Navigation Cards */}
       <View style={styles.statsRow}>
@@ -59,10 +73,14 @@ export default function ChildDashboard() {
           onPress={() => router.push('/(child)/missions')}
         >
           <Card style={styles.statCard}>
-            <Ionicons name="rocket" size={24} color={COLORS.primary} />
+            <View style={[styles.statIconContainer, { backgroundColor: COLORS.primary + '14' }]}>
+              <Ionicons name="rocket" size={22} color={COLORS.primary} />
+            </View>
             <Text style={styles.statValue}>{activeMissions.length}</Text>
             <Text style={styles.statLabel}>{t('missions.available')}</Text>
-            <Ionicons name="chevron-forward" size={16} color={COLORS.textLight} style={styles.chevron} />
+            <View style={styles.statChevron}>
+              <Ionicons name="chevron-forward" size={14} color={COLORS.textLight} />
+            </View>
           </Card>
         </Touchable>
 
@@ -71,10 +89,14 @@ export default function ChildDashboard() {
           onPress={() => router.push('/(child)/wishlist')}
         >
           <Card style={styles.statCard}>
-            <Ionicons name="gift" size={24} color={COLORS.secondary} />
+            <View style={[styles.statIconContainer, { backgroundColor: COLORS.secondary + '14' }]}>
+              <Ionicons name="gift" size={22} color={COLORS.secondary} />
+            </View>
             <Text style={styles.statValue}>{approvedGifts.length}</Text>
             <Text style={styles.statLabel}>{t('gifts.title')}</Text>
-            <Ionicons name="chevron-forward" size={16} color={COLORS.textLight} style={styles.chevron} />
+            <View style={styles.statChevron}>
+              <Ionicons name="chevron-forward" size={14} color={COLORS.textLight} />
+            </View>
           </Card>
         </Touchable>
       </View>
@@ -88,44 +110,80 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   content: {
-    padding: SPACING.lg,
+    paddingBottom: SPACING.xl,
   },
-  pointsCard: {
-    alignItems: 'center',
-    backgroundColor: '#FFF9E6',
+
+  // Points card
+  welcomeText: {
+    fontSize: FONT_SIZES.xl,
+    fontWeight: '700',
+    color: '#FFFFFF',
     marginBottom: SPACING.md,
   },
+  pointsGradient: {
+    alignItems: 'center',
+    paddingTop: SPACING.xl,
+    paddingBottom: SPACING.xxl,
+    marginBottom: SPACING.lg,
+  },
+  pointsIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.sm,
+  },
   pointsValue: {
-    fontSize: 48,
+    fontSize: 56,
     fontWeight: '700',
-    color: COLORS.textPrimary,
-    marginTop: SPACING.sm,
+    color: '#FFFFFF',
   },
   pointsLabel: {
     fontSize: FONT_SIZES.md,
-    color: COLORS.textSecondary,
+    color: 'rgba(255,255,255,0.85)',
+    marginTop: SPACING.xs,
   },
+
+  // Stats
   statsRow: {
     flexDirection: 'row',
     gap: SPACING.md,
+    marginHorizontal: SPACING.lg,
     marginBottom: SPACING.md,
   },
   statCard: {
     flex: 1,
     alignItems: 'center',
+    paddingVertical: SPACING.lg,
+  },
+  statIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.sm,
   },
   statValue: {
-    fontSize: FONT_SIZES.xl,
+    fontSize: FONT_SIZES.xxl,
     fontWeight: '700',
     color: COLORS.textPrimary,
-    marginTop: SPACING.xs,
   },
   statLabel: {
     fontSize: FONT_SIZES.xs,
     color: COLORS.textSecondary,
     textAlign: 'center',
+    marginTop: 2,
   },
-  chevron: {
+  statChevron: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: COLORS.background,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginTop: SPACING.sm,
   },
 });

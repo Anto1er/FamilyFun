@@ -11,6 +11,7 @@ interface GiftsState {
   approveGift: (giftId: string, pointsCost: number, approvedBy: string) => Promise<void>;
   rejectGift: (giftId: string) => Promise<void>;
   redeemGift: (giftId: string) => Promise<void>;
+  deleteGift: (giftId: string) => Promise<void>;
 }
 
 export const useGiftsStore = create<GiftsState>((set, get) => ({
@@ -78,6 +79,18 @@ export const useGiftsStore = create<GiftsState>((set, get) => ({
       gifts: state.gifts.map((g) =>
         g.id === giftId ? { ...g, status: 'redeemed' as const } : g
       ),
+    }));
+  },
+
+  deleteGift: async (giftId) => {
+    const { error } = await (supabase
+      .from('gifts') as any)
+      .delete()
+      .eq('id', giftId);
+    if (error) throw error;
+
+    set((state) => ({
+      gifts: state.gifts.filter((g) => g.id !== giftId),
     }));
   },
 }));

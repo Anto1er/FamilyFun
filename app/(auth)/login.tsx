@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -75,22 +76,24 @@ export default function LoginScreen() {
 
         {/* Toggle parent/child mode */}
         <View style={styles.modeRow}>
-          <Touchable
+          <TouchableOpacity
             style={[styles.modeButton, mode === 'parent' && styles.modeButtonActive]}
             onPress={() => setMode('parent')}
+            activeOpacity={0.8}
           >
             <Text style={[styles.modeText, mode === 'parent' && styles.modeTextActive]}>
               {t('roles.parent')}
             </Text>
-          </Touchable>
-          <Touchable
+          </TouchableOpacity>
+          <TouchableOpacity
             style={[styles.modeButton, mode === 'child' && styles.modeButtonActive]}
             onPress={() => setMode('child')}
+            activeOpacity={0.8}
           >
             <Text style={[styles.modeText, mode === 'child' && styles.modeTextActive]}>
               {t('roles.child')}
             </Text>
-          </Touchable>
+          </TouchableOpacity>
         </View>
 
         {mode === 'parent' ? (

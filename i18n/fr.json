@@ -98,6 +98,8 @@
     "setCost": "Definir le cout",
     "noGifts": "Aucun cadeau dans la liste",
     "insufficientPoints": "Points insuffisants",
+    "deleteGift": "Supprimer le souhait",
+    "deleteGiftConfirm": "Veux-tu vraiment supprimer ce souhait ?",
     "selectChild": "Pour qui ?",
     "wholeFamily": "Toute la famille"
   },
@@ -108,7 +110,13 @@
     "recentActivity": "Activite recente",
     "children": "Enfants",
     "pendingValidations": "A valider",
-    "claimedMissions": "Missions prises"
+    "claimedMissions": "Missions prises",
+    "welcome": "Bonjour {{name}}",
+    "familyOverview": "Famille {{name}}",
+    "activeMissions": "actives",
+    "seeAll": "Voir tout",
+    "noPendingActions": "Tout est a jour !",
+    "childPoints": "{{points}} pts"
   },
   "history": {
     "title": "Historique",
