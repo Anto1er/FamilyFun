@@ -6,6 +6,8 @@ export type GiftStatus = 'pending_approval' | 'approved' | 'rejected' | 'redeeme
 export type SubmissionStatus = 'claimed' | 'pending' | 'approved' | 'rejected';
 export type TransactionType = 'mission_reward' | 'gift_redemption' | 'manual_adjustment';
 export type NotificationType =
+  | 'mission_available'
+  | 'mission_claimed'
   | 'mission_submitted'
   | 'mission_validated'
   | 'mission_rejected'

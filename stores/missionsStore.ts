@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { supabase } from '@/lib/supabase';
+import { notifyParents, notifyChild } from '@/lib/notifications';
 import { Mission, MissionSubmission } from '@/types';
 
 interface MissionsState {
@@ -12,7 +13,7 @@ interface MissionsState {
   updateMission: (missionId: string, updates: Partial<Pick<Mission, 'title' | 'description' | 'points_reward' | 'recurrence'>>) => Promise<void>;
   archiveMission: (missionId: string) => Promise<void>;
   fetchSubmissions: (familyId: string) => Promise<void>;
-  claimMission: (missionId: string, childId: string, familyId: string) => Promise<void>;
+  claimMission: (missionId: string, childId: string, familyId: string, assignedByParent?: boolean) => Promise<void>;
   submitMission: (missionId: string, childId: string, familyId: string, note?: string) => Promise<void>;
   completeClaim: (submissionId: string, familyId: string, note?: string) => Promise<void>;
   validateSubmission: (submissionId: string, status: 'approved' | 'rejected', validatedBy: string) => Promise<void>;
@@ -83,7 +84,7 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
     set({ submissions: (data as MissionSubmission[]) ?? [] });
   },
 
-  claimMission: async (missionId, childId, familyId) => {
+  claimMission: async (missionId, childId, familyId, assignedByParent) => {
     const { error } = await (supabase.from('mission_submissions') as any).insert({
       mission_id: missionId,
       child_id: childId,
@@ -92,6 +93,39 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
     });
     if (error) throw error;
     await get().fetchSubmissions(familyId);
+
+    // Send notifications in the background (non-blocking)
+    const mission = get().missions.find((m) => m.id === missionId);
+    if (mission) {
+      if (assignedByParent) {
+        // Parent assigned → notify child that a mission is available
+        notifyChild(
+          childId,
+          familyId,
+          mission.title,
+          `La mission "${mission.title}" t'a ete attribuee !`,
+          'mission_available',
+          { screen: '(child)/missions', missionId }
+        ).catch(() => { });
+      } else {
+        // Child claimed → notify parents
+        const { data: childProfile } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('id', childId)
+          .single();
+
+        if (childProfile) {
+          notifyParents(
+            familyId,
+            'Mission prise',
+            `${(childProfile as any).display_name} a pris la mission "${mission.title}"`,
+            'mission_claimed',
+            { screen: '(parent)/missions', missionId }
+          ).catch(() => { });
+        }
+      }
+    }
   },
 
   submitMission: async (missionId, childId, familyId, note) => {
@@ -114,6 +148,27 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
       .eq('id', submissionId);
     if (error) throw error;
     await get().fetchSubmissions(familyId);
+
+    // Notify parents that a child completed a mission
+    const submission = get().submissions.find((s) => s.id === submissionId);
+    if (submission) {
+      const mission = get().missions.find((m) => m.id === submission.mission_id);
+      const { data: childProfile } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('id', submission.child_id)
+        .single();
+
+      if (mission && childProfile) {
+        notifyParents(
+          familyId,
+          'Mission soumise',
+          `${(childProfile as any).display_name} a termine la mission "${mission.title}" et attend ta validation`,
+          'mission_submitted',
+          { screen: '(parent)/missions', missionId: mission.id }
+        ).catch(() => { });
+      }
+    }
   },
 
   validateSubmission: async (submissionId, status, validatedBy) => {
@@ -131,6 +186,27 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
     const submission = get().submissions.find((s) => s.id === submissionId);
     if (submission?.family_id) {
       await get().fetchSubmissions(submission.family_id);
+    }
+
+    // Notify the child about the validation result
+    if (submission) {
+      const mission = get().missions.find((m) => m.id === submission.mission_id);
+      if (mission) {
+        const notifType = status === 'approved' ? 'mission_validated' : 'mission_rejected';
+        const title = status === 'approved' ? 'Mission validee' : 'Mission refusee';
+        const body = status === 'approved'
+          ? `Ta mission "${mission.title}" a ete approuvee ! Tu as gagne ${mission.points_reward} points`
+          : `Ta mission "${mission.title}" a ete refusee`;
+
+        notifyChild(
+          submission.child_id,
+          submission.family_id,
+          title,
+          body,
+          notifType,
+          { screen: '(child)/missions', missionId: mission.id }
+        ).catch(() => { });
+      }
     }
   },
 }));

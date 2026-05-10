@@ -45,15 +45,6 @@ export default function ParentLayout() {
         }}
       />
       <Tabs.Screen
-        name="notifications"
-        options={{
-          title: t('notifications.title'),
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="notifications" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="settings"
         options={{
           title: t('settings.title'),
@@ -65,6 +56,7 @@ export default function ParentLayout() {
       {/* Hide sub-routes from tabs */}
       <Tabs.Screen name="missions" options={{ href: null }} />
       <Tabs.Screen name="add-child" options={{ href: null }} />
+      <Tabs.Screen name="notifications" options={{ href: null }} />
     </Tabs>
   );
 }

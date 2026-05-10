@@ -106,6 +106,7 @@ export async function notifyParents(
   familyId: string,
   title: string,
   body: string,
+  type: string = 'mission_submitted',
   data?: Record<string, unknown>
 ) {
   const { data: parents } = await supabase
@@ -121,7 +122,7 @@ export async function notifyParents(
     await (supabase.from('notifications') as any).insert({
       recipient_id: parent.id,
       family_id: familyId,
-      type: 'mission_submitted',
+      type,
       title,
       body,
       data: data ?? {},

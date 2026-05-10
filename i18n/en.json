@@ -119,7 +119,17 @@
   "notifications": {
     "title": "Notifications",
     "noNotifications": "No notifications",
-    "markAllRead": "Mark all as read"
+    "markAllRead": "Mark all as read",
+    "missionAvailable": "New mission available",
+    "missionAvailableBody": "The mission \"{{title}}\" has been assigned to you!",
+    "missionClaimed": "Mission claimed",
+    "missionClaimedBody": "{{childName}} claimed the mission \"{{title}}\"",
+    "missionCompleted": "Mission submitted",
+    "missionCompletedBody": "{{childName}} completed the mission \"{{title}}\" and is waiting for your validation",
+    "missionApproved": "Mission approved",
+    "missionApprovedBody": "Your mission \"{{title}}\" has been approved! You earned {{points}} points",
+    "missionRejected": "Mission rejected",
+    "missionRejectedBody": "Your mission \"{{title}}\" has been rejected"
   },
   "settings": {
     "title": "Settings",

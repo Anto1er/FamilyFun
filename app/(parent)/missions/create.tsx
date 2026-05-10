@@ -49,10 +49,10 @@ export default function CreateMissionScreen() {
 
       if (assignedChildId === 'everyone') {
         for (const child of children) {
-          await claimMission(missionId, child.id, profile.family_id);
+          await claimMission(missionId, child.id, profile.family_id, true);
         }
       } else if (assignedChildId !== 'none') {
-        await claimMission(missionId, assignedChildId, profile.family_id);
+        await claimMission(missionId, assignedChildId, profile.family_id, true);
       }
 
       router.back();

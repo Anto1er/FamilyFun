@@ -119,7 +119,17 @@
   "notifications": {
     "title": "Notifications",
     "noNotifications": "Aucune notification",
-    "markAllRead": "Tout marquer comme lu"
+    "markAllRead": "Tout marquer comme lu",
+    "missionAvailable": "Nouvelle mission disponible",
+    "missionAvailableBody": "La mission \"{{title}}\" t'a ete attribuee !",
+    "missionClaimed": "Mission prise",
+    "missionClaimedBody": "{{childName}} a pris la mission \"{{title}}\"",
+    "missionCompleted": "Mission soumise",
+    "missionCompletedBody": "{{childName}} a termine la mission \"{{title}}\" et attend ta validation",
+    "missionApproved": "Mission validee",
+    "missionApprovedBody": "Ta mission \"{{title}}\" a ete approuvee ! Tu as gagne {{points}} points",
+    "missionRejected": "Mission refusee",
+    "missionRejectedBody": "Ta mission \"{{title}}\" a ete refusee"
   },
   "settings": {
     "title": "Parametres",
