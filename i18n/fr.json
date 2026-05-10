@@ -50,7 +50,8 @@
     "childPassword": "Mot de passe de l'enfant",
     "changePassword": "Modifier le mot de passe",
     "newPassword": "Nouveau mot de passe",
-    "passwordChanged": "Mot de passe modifie"
+    "passwordChanged": "Mot de passe modifie",
+    "management": "Gestion du compte"
   },
   "missions": {
     "title": "Missions",

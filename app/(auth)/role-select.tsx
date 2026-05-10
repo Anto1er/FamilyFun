@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/Button';
+import { Touchable } from '@/components/ui/Touchable';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '@/lib/constants';
 import { UserRole } from '@/types';
 
@@ -32,10 +33,9 @@ export default function RoleSelectScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>{t('roles.title')}</Text>
 
-      <TouchableOpacity
+      <Touchable
         style={[styles.roleCard, selectedRole === 'parent' && styles.roleCardSelected]}
         onPress={() => setSelectedRole('parent')}
-        activeOpacity={0.7}
       >
         <Ionicons
           name="people"
@@ -46,12 +46,11 @@ export default function RoleSelectScreen() {
           {t('roles.parent')}
         </Text>
         <Text style={styles.roleDesc}>{t('roles.parentDesc')}</Text>
-      </TouchableOpacity>
+      </Touchable>
 
-      <TouchableOpacity
+      <Touchable
         style={[styles.roleCard, selectedRole === 'child' && styles.roleCardSelected]}
         onPress={() => setSelectedRole('child')}
-        activeOpacity={0.7}
       >
         <Ionicons
           name="happy"
@@ -62,7 +61,7 @@ export default function RoleSelectScreen() {
           {t('roles.child')}
         </Text>
         <Text style={styles.roleDesc}>{t('roles.childDesc')}</Text>
-      </TouchableOpacity>
+      </Touchable>
 
       <Button
         title={t('common.confirm')}

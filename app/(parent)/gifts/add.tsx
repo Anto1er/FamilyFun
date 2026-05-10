@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Alert, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/authStore';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { Ionicons } from '@expo/vector-icons';
+import { Touchable } from '@/components/ui/Touchable';
 import { COLORS, SPACING, FONT_SIZES } from '@/lib/constants';
 
 export default function ParentAddGiftScreen() {
@@ -75,7 +76,7 @@ export default function ParentAddGiftScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.sectionLabel}>{t('gifts.selectChild')}</Text>
       <View style={styles.childrenRow}>
-        <TouchableOpacity onPress={toggleAllFamily} activeOpacity={0.7}>
+        <Touchable onPress={toggleAllFamily}>
           <Card style={[styles.childCard, allFamily && styles.childCardSelected]}>
             <Ionicons
               name="people"
@@ -86,14 +87,13 @@ export default function ParentAddGiftScreen() {
               {t('gifts.wholeFamily')}
             </Text>
           </Card>
-        </TouchableOpacity>
+        </Touchable>
         {children.map((child) => {
           const selected = !allFamily && selectedChildIds.includes(child.id);
           return (
-            <TouchableOpacity
+            <Touchable
               key={child.id}
               onPress={() => toggleChild(child.id)}
-              activeOpacity={0.7}
             >
               <Card style={[styles.childCard, selected && styles.childCardSelected]}>
                 <Ionicons
@@ -105,7 +105,7 @@ export default function ParentAddGiftScreen() {
                   {child.display_name}
                 </Text>
               </Card>
-            </TouchableOpacity>
+            </Touchable>
           );
         })}
       </View>

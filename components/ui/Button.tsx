@@ -1,11 +1,12 @@
 import React from 'react';
 import {
-  TouchableOpacity,
+  Pressable,
   Text,
   StyleSheet,
   ActivityIndicator,
   ViewStyle,
   TextStyle,
+  Platform,
 } from 'react-native';
 import { COLORS, BORDER_RADIUS, SPACING, FONT_SIZES } from '@/lib/constants';
 
@@ -33,17 +34,18 @@ export function Button({
   const isDisabled = disabled || loading;
 
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={onPress}
       disabled={isDisabled}
-      style={[
+      android_ripple={{ color: 'rgba(255, 255, 255, 0.25)', borderless: false }}
+      style={({ pressed }) => [
         styles.base,
         styles[variant],
         styles[`size_${size}`],
         isDisabled && styles.disabled,
+        pressed && Platform.OS !== 'android' && { opacity: 0.7 },
         style,
       ]}
-      activeOpacity={0.7}
     >
       {loading ? (
         <ActivityIndicator
@@ -62,7 +64,7 @@ export function Button({
           {title}
         </Text>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 

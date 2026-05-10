@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, RefreshControl, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useMissionsStore } from '@/stores/missionsStore';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Touchable } from '@/components/ui/Touchable';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '@/lib/constants';
 import { Mission } from '@/types';
 
@@ -30,7 +31,7 @@ export default function ChildMissionsScreen() {
   };
 
   const renderMission = ({ item }: { item: Mission }) => (
-    <TouchableOpacity onPress={() => router.push(`/(child)/missions/${item.id}`)}>
+    <Touchable onPress={() => router.push(`/(child)/missions/${item.id}`)}>
       <Card style={styles.missionCard}>
         <View style={styles.missionHeader}>
           <Ionicons name="rocket" size={24} color={COLORS.primary} />
@@ -53,7 +54,7 @@ export default function ChildMissionsScreen() {
           </Text>
         </View>
       </Card>
-    </TouchableOpacity>
+    </Touchable>
   );
 
   if (!loading && missions.length === 0) {

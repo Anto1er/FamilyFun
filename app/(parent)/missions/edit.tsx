@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Alert, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useMissionsStore } from '@/stores/missionsStore';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Touchable } from '@/components/ui/Touchable';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '@/lib/constants';
 import { MissionRecurrence } from '@/types';
 
@@ -76,7 +77,7 @@ export default function EditMissionScreen() {
       <Text style={styles.label}>{t('missions.recurrence')}</Text>
       <View style={styles.recurrenceRow}>
         {recurrenceOptions.map((option) => (
-          <TouchableOpacity
+          <Touchable
             key={option.key}
             style={[
               styles.recurrenceChip,
@@ -92,7 +93,7 @@ export default function EditMissionScreen() {
             >
               {option.label}
             </Text>
-          </TouchableOpacity>
+          </Touchable>
         ))}
       </View>
 

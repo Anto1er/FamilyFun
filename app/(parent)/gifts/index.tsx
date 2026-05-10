@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, View, Text, StyleSheet, RefreshControl, TouchableOpacity } from 'react-native';
+import { FlatList, View, Text, StyleSheet, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import { useGiftsStore } from '@/stores/giftsStore';
 import { useFamilyStore } from '@/stores/familyStore';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Touchable } from '@/components/ui/Touchable';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '@/lib/constants';
 import { Gift } from '@/types';
 
@@ -37,7 +38,7 @@ export default function ParentGiftsScreen() {
     members.find((m) => m.id === childId)?.display_name ?? '?';
 
   const renderGift = ({ item }: { item: Gift }) => (
-    <TouchableOpacity onPress={() => router.push(`/(parent)/gifts/${item.id}`)}>
+    <Touchable onPress={() => router.push(`/(parent)/gifts/${item.id}`)}>
       <Card style={styles.giftCard}>
         <View style={styles.giftRow}>
           <Ionicons name="gift" size={24} color={COLORS.secondary} />
@@ -55,31 +56,31 @@ export default function ParentGiftsScreen() {
           )}
         </View>
       </Card>
-    </TouchableOpacity>
+    </Touchable>
   );
 
   const allGifts = [...pendingGifts, ...approvedGifts];
 
   return (
-    <FlatList
-      style={styles.container}
-      contentContainerStyle={styles.list}
-      data={allGifts}
-      keyExtractor={(item) => item.id}
-      renderItem={renderGift}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      ListHeaderComponent={
-        <TouchableOpacity onPress={() => router.push('/(parent)/gifts/add')} activeOpacity={0.7}>
-          <Card style={styles.addCard}>
-            <Ionicons name="add-circle" size={24} color={COLORS.primary} />
-            <Text style={styles.addText}>{t('gifts.add')}</Text>
-          </Card>
-        </TouchableOpacity>
-      }
-      ListEmptyComponent={
-        !loading ? <EmptyState icon="gift-outline" title={t('gifts.noGifts')} /> : null
-      }
-    />
+    <View style={styles.wrapper}>
+      <FlatList
+        style={styles.container}
+        contentContainerStyle={styles.list}
+        data={allGifts}
+        keyExtractor={(item) => item.id}
+        renderItem={renderGift}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        ListEmptyComponent={
+          !loading ? <EmptyState icon="gift-outline" title={t('gifts.noGifts')} /> : null
+        }
+      />
+      <Touchable
+        style={styles.fab}
+        onPress={() => router.push('/(parent)/gifts/add')}
+      >
+        <Ionicons name="add" size={28} color={COLORS.surface} />
+      </Touchable>
+    </View>
   );
 }
 
@@ -128,15 +129,24 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.textSecondary,
   },
-  addCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    marginBottom: SPACING.lg,
+  wrapper: {
+    flex: 1,
+    backgroundColor: COLORS.background,
   },
-  addText: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: '600',
-    color: COLORS.primary,
+  fab: {
+    position: 'absolute',
+    bottom: SPACING.lg,
+    right: SPACING.lg,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
 });

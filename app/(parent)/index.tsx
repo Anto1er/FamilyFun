@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import { useFamilyStore } from '@/stores/familyStore';
 import { useMissionsStore } from '@/stores/missionsStore';
 import { useGiftsStore } from '@/stores/giftsStore';
 import { Card } from '@/components/ui/Card';
+import { Touchable } from '@/components/ui/Touchable';
 import { COLORS, SPACING, FONT_SIZES } from '@/lib/constants';
 import { Profile } from '@/types';
 
@@ -58,7 +59,7 @@ export default function ParentDashboard() {
     >
       {/* Pending Validations */}
       {pendingSubmissions.length > 0 && (
-        <TouchableOpacity onPress={() => router.push('/(parent)/missions')} activeOpacity={0.7}>
+        <Touchable onPress={() => router.push('/(parent)/missions')}>
           <Card style={styles.alertCard}>
             <Ionicons name="alert-circle" size={24} color={COLORS.warning} />
             <Text style={styles.alertText}>
@@ -66,14 +67,13 @@ export default function ParentDashboard() {
             </Text>
             <Ionicons name="chevron-forward" size={20} color={COLORS.warning} />
           </Card>
-        </TouchableOpacity>
+        </Touchable>
       )}
 
       {/* Missions Section */}
       <Text style={styles.sectionTitle}>{t('missions.title')}</Text>
-      <TouchableOpacity
+      <Touchable
         onPress={() => router.push('/(parent)/missions')}
-        activeOpacity={0.7}
       >
         <Card style={styles.missionCard}>
           <View style={styles.missionRow}>
@@ -89,25 +89,24 @@ export default function ParentDashboard() {
             <Ionicons name="chevron-forward" size={20} color={COLORS.textLight} />
           </View>
         </Card>
-      </TouchableOpacity>
+      </Touchable>
 
-      <TouchableOpacity
+      <Touchable
         onPress={() => router.push('/(parent)/missions/create')}
-        activeOpacity={0.7}
       >
         <Card style={styles.addCard}>
           <Ionicons name="add-circle" size={24} color={COLORS.primary} />
           <Text style={styles.addText}>{t('missions.create')}</Text>
         </Card>
-      </TouchableOpacity>
+      </Touchable>
 
       {/* Children Section */}
       <Text style={styles.sectionTitle}>{t('dashboard.children')}</Text>
       {children.length > 0 ? (
         children.map((child) => (
-          <TouchableOpacity
+          <Touchable
             key={child.id}
-            onPress={() => router.push(`/(parent)/children/${child.id}`)}
+            onPress={() => router.push(`/child-detail/${child.id}`)}
           >
             <Card style={styles.childCard}>
               <View style={styles.childRow}>
@@ -121,7 +120,7 @@ export default function ParentDashboard() {
                 <Ionicons name="chevron-forward" size={20} color={COLORS.textLight} />
               </View>
             </Card>
-          </TouchableOpacity>
+          </Touchable>
         ))
       ) : (
         <Card style={styles.emptyCard}>
@@ -132,15 +131,6 @@ export default function ParentDashboard() {
         </Card>
       )}
 
-      <TouchableOpacity
-        onPress={() => router.push('/(parent)/children/add')}
-        activeOpacity={0.7}
-      >
-        <Card style={styles.addCard}>
-          <Ionicons name="person-add" size={24} color={COLORS.primary} />
-          <Text style={styles.addText}>{t('family.addChild')}</Text>
-        </Card>
-      </TouchableOpacity>
     </ScrollView>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useMissionsStore } from '@/stores/missionsStore';
 import { useGiftsStore } from '@/stores/giftsStore';
 import { Card } from '@/components/ui/Card';
+import { Touchable } from '@/components/ui/Touchable';
 import { COLORS, SPACING, FONT_SIZES } from '@/lib/constants';
 
 export default function ChildDashboard() {
@@ -53,10 +54,9 @@ export default function ChildDashboard() {
 
       {/* Navigation Cards */}
       <View style={styles.statsRow}>
-        <TouchableOpacity
+        <Touchable
           style={{ flex: 1 }}
           onPress={() => router.push('/(child)/missions')}
-          activeOpacity={0.7}
         >
           <Card style={styles.statCard}>
             <Ionicons name="rocket" size={24} color={COLORS.primary} />
@@ -64,12 +64,11 @@ export default function ChildDashboard() {
             <Text style={styles.statLabel}>{t('missions.available')}</Text>
             <Ionicons name="chevron-forward" size={16} color={COLORS.textLight} style={styles.chevron} />
           </Card>
-        </TouchableOpacity>
+        </Touchable>
 
-        <TouchableOpacity
+        <Touchable
           style={{ flex: 1 }}
           onPress={() => router.push('/(child)/wishlist')}
-          activeOpacity={0.7}
         >
           <Card style={styles.statCard}>
             <Ionicons name="gift" size={24} color={COLORS.secondary} />
@@ -77,7 +76,7 @@ export default function ChildDashboard() {
             <Text style={styles.statLabel}>{t('gifts.title')}</Text>
             <Ionicons name="chevron-forward" size={16} color={COLORS.textLight} style={styles.chevron} />
           </Card>
-        </TouchableOpacity>
+        </Touchable>
       </View>
     </ScrollView>
   );

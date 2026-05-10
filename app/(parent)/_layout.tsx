@@ -8,6 +8,7 @@ export default function ParentLayout() {
 
   return (
     <Tabs
+      backBehavior="history"
       screenOptions={{
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.textLight,
@@ -35,7 +36,7 @@ export default function ParentLayout() {
         }}
       />
       <Tabs.Screen
-        name="gifts/index"
+        name="gifts"
         options={{
           title: t('gifts.title'),
           tabBarIcon: ({ color, size }) => (
@@ -62,14 +63,8 @@ export default function ParentLayout() {
         }}
       />
       {/* Hide sub-routes from tabs */}
-      <Tabs.Screen name="missions/index" options={{ href: null }} />
-      <Tabs.Screen name="missions/create" options={{ href: null }} />
-      <Tabs.Screen name="missions/edit" options={{ href: null }} />
-      <Tabs.Screen name="missions/[id]" options={{ href: null }} />
-      <Tabs.Screen name="gifts/add" options={{ href: null }} />
-      <Tabs.Screen name="gifts/[id]" options={{ href: null }} />
-      <Tabs.Screen name="children/[id]" options={{ href: null }} />
-      <Tabs.Screen name="children/add" options={{ href: null }} />
+      <Tabs.Screen name="missions" options={{ href: null }} />
+      <Tabs.Screen name="add-child" options={{ href: null }} />
     </Tabs>
   );
 }

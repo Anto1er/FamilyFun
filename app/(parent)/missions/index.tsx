@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, RefreshControl, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import { useMissionsStore } from '@/stores/missionsStore';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Touchable } from '@/components/ui/Touchable';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '@/lib/constants';
 import { Mission } from '@/types';
 
@@ -41,7 +42,7 @@ export default function ParentMissionsScreen() {
   const renderMission = ({ item }: { item: Mission }) => {
     const pendingCount = getPendingCount(item.id);
     return (
-      <TouchableOpacity onPress={() => router.push(`/(parent)/missions/${item.id}`)}>
+      <Touchable onPress={() => router.push(`/(parent)/missions/${item.id}`)}>
         <Card style={styles.missionCard}>
           <View style={styles.missionRow}>
             <View style={styles.missionInfo}>
@@ -56,7 +57,7 @@ export default function ParentMissionsScreen() {
             <Ionicons name="chevron-forward" size={20} color={COLORS.textLight} />
           </View>
         </Card>
-      </TouchableOpacity>
+      </Touchable>
     );
   };
 
@@ -73,12 +74,12 @@ export default function ParentMissionsScreen() {
         }
       />
       <View style={styles.fabContainer}>
-        <TouchableOpacity
+        <Touchable
           style={styles.fab}
           onPress={() => router.push('/(parent)/missions/create')}
         >
           <Ionicons name="add" size={28} color="#fff" />
-        </TouchableOpacity>
+        </Touchable>
       </View>
     </View>
   );

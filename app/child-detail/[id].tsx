@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Alert, Pressable, Modal, KeyboardAvoidingView, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Touchable } from '@/components/ui/Touchable';
 import { COLORS, SPACING, FONT_SIZES } from '@/lib/constants';
 import { Transaction } from '@/types';
 
@@ -22,6 +23,7 @@ export default function ChildDetailScreen() {
   const [removing, setRemoving] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [changingPassword, setChangingPassword] = useState(false);
+  const [showManagement, setShowManagement] = useState(false);
 
   const child = members.find((m) => m.id === id);
 
@@ -119,30 +121,57 @@ export default function ChildDetailScreen() {
         contentContainerStyle={styles.list}
       />
 
-      <Text style={styles.sectionTitle}>{t('family.changePassword')}</Text>
-      <Card style={styles.passwordCard}>
-        <Input
-          label={t('family.newPassword')}
-          value={newPassword}
-          onChangeText={setNewPassword}
-          secureTextEntry
-        />
-        <Button
-          title={t('family.changePassword')}
-          onPress={handleChangePassword}
-          loading={changingPassword}
-          disabled={newPassword.length < 6}
-          style={styles.passwordButton}
-        />
-      </Card>
+      <Touchable
+        style={styles.managementToggle}
+        onPress={() => setShowManagement(true)}
+      >
+        <Ionicons name="settings-outline" size={20} color={COLORS.textSecondary} />
+        <Text style={styles.managementToggleText}>{t('family.management')}</Text>
+      </Touchable>
 
-      <Button
-        title={t('family.removeChild')}
-        onPress={handleRemoveChild}
-        loading={removing}
-        variant="danger"
-        style={styles.removeButton}
-      />
+      <Modal
+        visible={showManagement}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setShowManagement(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setShowManagement(false)}
+        />
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.modalContainer}
+        >
+          <View style={styles.modalContent}>
+            <View style={styles.modalHandle} />
+            <Text style={styles.modalTitle}>{t('family.management')}</Text>
+
+            <Text style={styles.sectionTitle}>{t('family.changePassword')}</Text>
+            <Input
+              label={t('family.newPassword')}
+              value={newPassword}
+              onChangeText={setNewPassword}
+              secureTextEntry
+            />
+            <Button
+              title={t('family.changePassword')}
+              onPress={handleChangePassword}
+              loading={changingPassword}
+              disabled={newPassword.length < 6}
+              style={styles.passwordButton}
+            />
+
+            <Button
+              title={t('family.removeChild')}
+              onPress={handleRemoveChild}
+              loading={removing}
+              variant="danger"
+              style={styles.removeButton}
+            />
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }
@@ -207,9 +236,49 @@ const styles = StyleSheet.create({
   removeButton: {
     marginTop: SPACING.md,
   },
-  passwordCard: {
+  managementToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.md,
+    gap: SPACING.sm,
+  },
+  managementToggleText: {
+    fontSize: FONT_SIZES.md,
+    color: COLORS.textSecondary,
+    fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  modalContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  modalContent: {
+    backgroundColor: COLORS.surface ?? '#FFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: SPACING.lg,
+    paddingBottom: SPACING.xl ?? 32,
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#CCC',
+    alignSelf: 'center',
+    marginBottom: SPACING.md,
+  },
+  modalTitle: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    textAlign: 'center',
     marginBottom: SPACING.lg,
-    padding: SPACING.md,
   },
   passwordButton: {
     marginTop: SPACING.sm,

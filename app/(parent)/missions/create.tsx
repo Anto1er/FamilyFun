@@ -6,9 +6,9 @@ import { useAuthStore } from '@/stores/authStore';
 import { useMissionsStore } from '@/stores/missionsStore';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Touchable } from '@/components/ui/Touchable';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '@/lib/constants';
 import { MissionRecurrence } from '@/types';
-import { TouchableOpacity } from 'react-native';
 
 export default function CreateMissionScreen() {
   const { t } = useTranslation();
@@ -76,7 +76,7 @@ export default function CreateMissionScreen() {
       <Text style={styles.label}>{t('missions.recurrence')}</Text>
       <View style={styles.recurrenceRow}>
         {recurrenceOptions.map((option) => (
-          <TouchableOpacity
+          <Touchable
             key={option.key}
             style={[
               styles.recurrenceChip,
@@ -92,7 +92,7 @@ export default function CreateMissionScreen() {
             >
               {option.label}
             </Text>
-          </TouchableOpacity>
+          </Touchable>
         ))}
       </View>
 

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Slot, useRouter, useSegments } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useAuthStore } from '@/stores/authStore';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -74,7 +74,7 @@ export default function RootLayout() {
     );
   }
 
-  return <Slot />;
+  return <Stack screenOptions={{ headerShown: false }} />;
 }
 
 const styles = StyleSheet.create({

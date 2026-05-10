@@ -4,13 +4,16 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@/stores/authStore';
 import { useFamilyStore } from '@/stores/familyStore';
+import { useRouter } from 'expo-router';
 import { Card } from '@/components/ui/Card';
+import { Touchable } from '@/components/ui/Touchable';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '@/lib/constants';
 
 export default function FamilyScreen() {
   const { t } = useTranslation();
   const profile = useAuthStore((s) => s.profile);
   const { family, members, fetchFamily, fetchMembers } = useFamilyStore();
+  const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
 
   const familyId = profile?.family_id;
@@ -31,70 +34,107 @@ export default function FamilyScreen() {
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-    >
-      {/* Family Name */}
-      {family && (
-        <Card style={styles.familyCard}>
-          <Ionicons name="home" size={32} color={COLORS.primary} />
-          <Text style={styles.familyName}>{family.name}</Text>
-        </Card>
-      )}
-
-      {/* Invite Code */}
-      <Card style={styles.codeCard}>
-        <Text style={styles.codeLabel}>{t('family.inviteCode')}</Text>
-        <Text style={styles.codeValue}>{family?.invite_code ?? '...'}</Text>
-        <Text style={styles.codeHint}>{t('family.shareCode')}</Text>
-      </Card>
-
-      {/* Members */}
-      <Text style={styles.sectionTitle}>{t('family.members')}</Text>
-      {members.length > 0 ? (
-        members.map((member) => (
-          <Card key={member.id} style={styles.memberCard}>
-            <View style={styles.memberRow}>
-              <View style={styles.avatar}>
-                <Ionicons
-                  name={member.role === 'parent' ? 'people' : 'happy'}
-                  size={24}
-                  color={member.role === 'parent' ? COLORS.primary : COLORS.secondary}
-                />
-              </View>
-              <View style={styles.memberInfo}>
-                <Text style={styles.memberName}>{member.display_name}</Text>
-                <Text style={styles.memberRole}>
-                  {member.role === 'parent' ? t('family.parent') : t('family.child')}
-                  {member.role === 'child' ? ` - ${member.points_balance} pts` : ''}
-                </Text>
-              </View>
-              {member.id === profile?.id && (
-                <View style={styles.youBadge}>
-                  <Text style={styles.youBadgeText}>Vous</Text>
-                </View>
-              )}
-            </View>
+    <View style={styles.wrapper}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        {/* Family Name */}
+        {family && (
+          <Card style={styles.familyCard}>
+            <Ionicons name="home" size={32} color={COLORS.primary} />
+            <Text style={styles.familyName}>{family.name}</Text>
           </Card>
-        ))
-      ) : (
-        <Card style={styles.emptyCard}>
-          <Text style={styles.emptyText}>{t('family.noMembers')}</Text>
+        )}
+
+        {/* Invite Code */}
+        <Card style={styles.codeCard}>
+          <Text style={styles.codeLabel}>{t('family.inviteCode')}</Text>
+          <Text style={styles.codeValue}>{family?.invite_code ?? '...'}</Text>
+          <Text style={styles.codeHint}>{t('family.shareCode')}</Text>
         </Card>
-      )}
-    </ScrollView>
+
+        {/* Members */}
+        <Text style={styles.sectionTitle}>{t('family.members')}</Text>
+        {members.length > 0 ? (
+          [...members]
+            .sort((a, b) => {
+              if (a.role === 'parent' && b.role !== 'parent') return -1;
+              if (a.role !== 'parent' && b.role === 'parent') return 1;
+              return 0;
+            })
+            .map((member) => {
+              const card = (
+                <Card key={member.id} style={styles.memberCard}>
+                  <View style={styles.memberRow}>
+                    <View style={styles.avatar}>
+                      <Ionicons
+                        name={member.role === 'parent' ? 'people' : 'happy'}
+                        size={24}
+                        color={member.role === 'parent' ? COLORS.primary : COLORS.secondary}
+                      />
+                    </View>
+                    <View style={styles.memberInfo}>
+                      <Text style={styles.memberName}>{member.display_name}</Text>
+                      <Text style={styles.memberRole}>
+                        {member.role === 'parent' ? t('family.parent') : t('family.child')}
+                        {member.role === 'child' ? ` - ${member.points_balance} pts` : ''}
+                      </Text>
+                    </View>
+                    {member.id === profile?.id && (
+                      <View style={styles.youBadge}>
+                        <Text style={styles.youBadgeText}>Vous</Text>
+                      </View>
+                    )}
+                  </View>
+                </Card>
+              );
+
+              if (member.role === 'child') {
+                return (
+                  <Touchable
+                    key={member.id}
+                    onPress={() => router.push(`/child-detail/${member.id}`)}
+                  >
+                    {card}
+                  </Touchable>
+                );
+              }
+
+              return card;
+            })
+        ) : (
+          <Card style={styles.emptyCard}>
+            <Text style={styles.emptyText}>{t('family.noMembers')}</Text>
+          </Card>
+        )}
+      </ScrollView>
+
+      {/* FAB - Add Child */}
+      <View style={styles.fabContainer}>
+        <Touchable
+          style={styles.fab}
+          onPress={() => router.navigate('/(parent)/add-child')}
+        >
+          <Ionicons name="person-add" size={24} color="#fff" />
+        </Touchable>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
   },
   content: {
     padding: SPACING.lg,
+    paddingBottom: 80,
   },
   familyCard: {
     alignItems: 'center',
@@ -178,5 +218,23 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     color: COLORS.textSecondary,
+  },
+  fabContainer: {
+    position: 'absolute',
+    bottom: SPACING.lg,
+    right: SPACING.lg,
+  },
+  fab: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
   },
 });

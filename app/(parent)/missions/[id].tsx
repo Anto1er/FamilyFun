@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import { useMissionsStore } from '@/stores/missionsStore';
 import { useFamilyStore } from '@/stores/familyStore';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { Touchable } from '@/components/ui/Touchable';
 import { COLORS, SPACING, FONT_SIZES } from '@/lib/constants';
 import { MissionSubmission } from '@/types';
 
@@ -97,9 +98,9 @@ export default function ParentMissionDetailScreen() {
             {mission.description && <Text style={styles.description}>{mission.description}</Text>}
             <Text style={styles.points}>+{mission.points_reward} pts</Text>
           </View>
-          <TouchableOpacity onPress={() => router.push(`/(parent)/missions/edit?id=${mission.id}`)}>
+          <Touchable onPress={() => router.push(`/(parent)/missions/edit?id=${mission.id}`)}>
             <Ionicons name="create-outline" size={24} color={COLORS.primary} />
-          </TouchableOpacity>
+          </Touchable>
         </View>
       </Card>
 

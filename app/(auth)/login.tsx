@@ -5,7 +5,6 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  TouchableOpacity,
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -14,6 +13,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Touchable } from '@/components/ui/Touchable';
 import { COLORS, SPACING, FONT_SIZES } from '@/lib/constants';
 
 export default function LoginScreen() {
@@ -75,22 +75,22 @@ export default function LoginScreen() {
 
         {/* Toggle parent/child mode */}
         <View style={styles.modeRow}>
-          <TouchableOpacity
+          <Touchable
             style={[styles.modeButton, mode === 'parent' && styles.modeButtonActive]}
             onPress={() => setMode('parent')}
           >
             <Text style={[styles.modeText, mode === 'parent' && styles.modeTextActive]}>
               {t('roles.parent')}
             </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Touchable>
+          <Touchable
             style={[styles.modeButton, mode === 'child' && styles.modeButtonActive]}
             onPress={() => setMode('child')}
           >
             <Text style={[styles.modeText, mode === 'child' && styles.modeTextActive]}>
               {t('roles.child')}
             </Text>
-          </TouchableOpacity>
+          </Touchable>
         </View>
 
         {mode === 'parent' ? (
@@ -133,12 +133,12 @@ export default function LoginScreen() {
           disabled={!canLogin}
         />
 
-        <TouchableOpacity
+        <Touchable
           style={styles.link}
           onPress={() => router.push('/(auth)/register')}
         >
           <Text style={styles.linkText}>{t('auth.noAccount')}</Text>
-        </TouchableOpacity>
+        </Touchable>
       </View>
     </KeyboardAvoidingView>
   );

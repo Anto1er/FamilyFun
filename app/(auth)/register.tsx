@@ -5,7 +5,6 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  TouchableOpacity,
   Alert,
   ScrollView,
 } from 'react-native';
@@ -15,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Touchable } from '@/components/ui/Touchable';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '@/lib/constants';
 import { UserRole } from '@/types';
 
@@ -67,32 +67,30 @@ export default function RegisterScreen() {
           <Text style={styles.title}>FamilyQuest</Text>
           <Text style={styles.subtitle}>{t('roles.title')}</Text>
 
-          <TouchableOpacity
+          <Touchable
             style={styles.roleCard}
             onPress={() => setSelectedRole('parent')}
-            activeOpacity={0.7}
           >
             <Ionicons name="people" size={48} color={COLORS.primary} />
             <Text style={[styles.roleName, { color: COLORS.primary }]}>{t('roles.parent')}</Text>
             <Text style={styles.roleDesc}>{t('roles.parentDesc')}</Text>
-          </TouchableOpacity>
+          </Touchable>
 
-          <TouchableOpacity
+          <Touchable
             style={styles.roleCard}
             onPress={() => setSelectedRole('child')}
-            activeOpacity={0.7}
           >
             <Ionicons name="happy" size={48} color={COLORS.secondary} />
             <Text style={[styles.roleName, { color: COLORS.secondary }]}>{t('roles.child')}</Text>
             <Text style={styles.roleDesc}>{t('roles.childDesc')}</Text>
-          </TouchableOpacity>
+          </Touchable>
 
-          <TouchableOpacity
+          <Touchable
             style={styles.link}
             onPress={() => router.push('/(auth)/login')}
           >
             <Text style={styles.linkText}>{t('auth.hasAccount')}</Text>
-          </TouchableOpacity>
+          </Touchable>
         </View>
       </View>
     );
@@ -142,12 +140,12 @@ export default function RegisterScreen() {
           disabled={!canRegister}
         />
 
-        <TouchableOpacity
+        <Touchable
           style={styles.link}
           onPress={() => setSelectedRole(null)}
         >
           <Text style={styles.linkText}>{t('common.back')}</Text>
-        </TouchableOpacity>
+        </Touchable>
       </ScrollView>
     </KeyboardAvoidingView>
   );

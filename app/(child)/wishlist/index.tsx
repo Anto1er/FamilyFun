@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { FlatList, StyleSheet, RefreshControl, TouchableOpacity, View, Text } from 'react-native';
+import { FlatList, StyleSheet, RefreshControl, View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import { useGiftsStore } from '@/stores/giftsStore';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Touchable } from '@/components/ui/Touchable';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '@/lib/constants';
 import { Gift } from '@/types';
 
@@ -50,7 +51,7 @@ export default function ChildWishlistScreen() {
   };
 
   const renderGift = ({ item }: { item: Gift }) => (
-    <TouchableOpacity onPress={() => router.push(`/(child)/wishlist/${item.id}`)}>
+    <Touchable onPress={() => router.push(`./${item.id}`)}>
       <Card style={styles.giftCard}>
         <View style={styles.giftHeader}>
           <Ionicons name="gift" size={24} color={COLORS.secondary} />
@@ -67,7 +68,7 @@ export default function ChildWishlistScreen() {
           </View>
         </View>
       </Card>
-    </TouchableOpacity>
+    </Touchable>
   );
 
   return (
@@ -83,12 +84,12 @@ export default function ChildWishlistScreen() {
         }
       />
       <View style={styles.fabContainer}>
-        <TouchableOpacity
+        <Touchable
           style={styles.fab}
-          onPress={() => router.push('/(child)/wishlist/add')}
+          onPress={() => router.push('./add')}
         >
           <Ionicons name="add" size={28} color="#fff" />
-        </TouchableOpacity>
+        </Touchable>
       </View>
     </View>
   );
