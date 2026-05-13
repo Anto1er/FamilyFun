@@ -41,7 +41,7 @@ export default function EditMissionScreen() {
         points_reward: parseInt(points, 10),
         recurrence,
       });
-      router.back();
+      router.dismiss();
     } catch (error) {
       Alert.alert(t('common.error'), String(error));
     } finally {

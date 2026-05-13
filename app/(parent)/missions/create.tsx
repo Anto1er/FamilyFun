@@ -55,7 +55,7 @@ export default function CreateMissionScreen() {
         await claimMission(missionId, assignedChildId, profile.family_id, true);
       }
 
-      router.back();
+      router.dismiss();
     } catch (error: any) {
       Alert.alert(t('common.error'), error?.message || JSON.stringify(error));
     } finally {

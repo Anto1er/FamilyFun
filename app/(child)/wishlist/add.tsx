@@ -32,7 +32,7 @@ export default function AddGiftScreen() {
         image_url: imageUrl || undefined,
         link_url: linkUrl || undefined,
       });
-      router.back();
+      router.dismiss();
     } catch (error) {
       Alert.alert(t('common.error'), String(error));
     } finally {

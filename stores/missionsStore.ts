@@ -63,6 +63,14 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
   },
 
   archiveMission: async (missionId: string) => {
+    // Delete non-completed submissions (claimed/pending) linked to this mission
+    const { error: subError } = await (supabase
+      .from('mission_submissions') as any)
+      .delete()
+      .eq('mission_id', missionId)
+      .in('status', ['claimed', 'pending']);
+    if (subError) throw subError;
+
     const { error } = await (supabase
       .from('missions') as any)
       .update({ status: 'archived' })
@@ -71,6 +79,9 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
 
     set((state) => ({
       missions: state.missions.filter((m) => m.id !== missionId),
+      submissions: state.submissions.filter(
+        (s) => !(s.mission_id === missionId && (s.status === 'claimed' || s.status === 'pending'))
+      ),
     }));
   },
 

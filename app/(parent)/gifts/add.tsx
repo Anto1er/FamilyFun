@@ -64,7 +64,7 @@ export default function ParentAddGiftScreen() {
           approved_by: profile.id,
         });
       }
-      router.back();
+      router.dismiss();
     } catch (error: any) {
       Alert.alert(t('common.error'), error?.message ?? String(error));
     } finally {

@@ -35,7 +35,7 @@ export default function EditGiftScreen() {
         link_url: linkUrl || null,
         points_cost: pointsCost ? parseInt(pointsCost, 10) : null,
       });
-      router.back();
+      router.dismiss();
     } catch (error) {
       Alert.alert(t('common.error'), String(error));
     } finally {

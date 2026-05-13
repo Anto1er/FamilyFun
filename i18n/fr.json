@@ -14,22 +14,22 @@
   },
   "auth": {
     "login": "Se connecter",
-    "register": "Creer un compte",
-    "logout": "Se deconnecter",
+    "register": "Créer un compte",
+    "logout": "Se déconnecter",
     "email": "Email",
     "password": "Mot de passe",
-    "displayName": "Prenom",
+    "displayName": "Prénom",
     "noAccount": "Pas encore de compte ?",
-    "hasAccount": "Deja un compte ?",
+    "hasAccount": "Déjà un compte ?",
     "loginError": "Email ou mot de passe incorrect",
-    "registerError": "Erreur lors de la creation du compte"
+    "registerError": "Erreur lors de la création du compte"
   },
   "roles": {
     "title": "Qui es-tu ?",
     "parent": "Parent",
     "child": "Enfant",
-    "parentDesc": "Je cree des missions et valide les recompenses",
-    "childDesc": "Je complete des missions et gagne des points"
+    "parentDesc": "Je crée des missions et valide les récompenses",
+    "childDesc": "Je complète des missions et gagne des points"
   },
   "family": {
     "title": "Ma Famille",
