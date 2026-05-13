@@ -8,6 +8,7 @@ export default function ChildLayout() {
 
   return (
     <Tabs
+      backBehavior="initialRoute"
       screenOptions={{
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.textLight,

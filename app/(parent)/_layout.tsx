@@ -8,7 +8,7 @@ export default function ParentLayout() {
 
   return (
     <Tabs
-      backBehavior="history"
+      backBehavior="initialRoute"
       screenOptions={{
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.textLight,

@@ -224,23 +224,39 @@ describe('missionsStore', () => {
   });
 
   describe('archiveMission', () => {
-    it('removes mission from local state after archiving', async () => {
+    it('removes mission and non-completed submissions from local state after archiving', async () => {
       useMissionsStore.setState({
         missions: [
           { id: 'm-1', title: 'Clean room' } as any,
           { id: 'm-2', title: 'Do homework' } as any,
         ],
+        submissions: [
+          { id: 's-1', mission_id: 'm-1', status: 'claimed' } as any,
+          { id: 's-2', mission_id: 'm-1', status: 'approved' } as any,
+          { id: 's-3', mission_id: 'm-2', status: 'claimed' } as any,
+        ],
       });
-      const chain = {
+      const deleteChain = {
+        delete: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        in: jest.fn().mockResolvedValue({ error: null }),
+      };
+      const updateChain = {
         update: jest.fn().mockReturnThis(),
         eq: jest.fn().mockResolvedValue({ error: null }),
       };
-      (supabase.from as jest.Mock).mockReturnValue(chain);
+      (supabase.from as jest.Mock)
+        .mockReturnValueOnce(deleteChain)   // delete submissions
+        .mockReturnValueOnce(updateChain);  // archive mission
 
       await useMissionsStore.getState().archiveMission('m-1');
       const state = useMissionsStore.getState();
       expect(state.missions).toHaveLength(1);
       expect(state.missions[0].id).toBe('m-2');
+      expect(state.submissions).toHaveLength(2);
+      expect(state.submissions.find((s: any) => s.id === 's-1')).toBeUndefined();
+      expect(state.submissions.find((s: any) => s.id === 's-2')).toBeDefined();
+      expect(state.submissions.find((s: any) => s.id === 's-3')).toBeDefined();
     });
   });
 

@@ -4,12 +4,12 @@ import { Alert, TextInput } from 'react-native';
 import EditGiftScreen from '@/app/(parent)/gifts/edit';
 
 const mockUpdateGift = jest.fn();
-const mockBack = jest.fn();
+const mockDismiss = jest.fn();
 let mockGifts: any[];
 
 jest.mock('expo-router', () => ({
   useLocalSearchParams: () => ({ id: 'g-1' }),
-  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: mockBack }),
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn(), dismiss: mockDismiss }),
 }));
 
 jest.mock('@/stores/giftsStore', () => ({
@@ -92,7 +92,7 @@ describe('EditGiftScreen', () => {
     fireEvent.press(screen.getByText('common.save'));
 
     await waitFor(() => {
-      expect(mockBack).toHaveBeenCalled();
+      expect(mockDismiss).toHaveBeenCalled();
     });
   });
 
