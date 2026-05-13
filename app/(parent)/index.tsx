@@ -98,32 +98,61 @@ export default function ParentDashboard() {
               <Text style={styles.headerStatValue}>{activeMissions.length}</Text>
               <Text style={styles.headerStatLabel}>{t('missions.title')}</Text>
             </View>
+            {pendingSubmissions.length > 0 && (
+              <>
+                <View style={styles.headerStatDivider} />
+                <View style={styles.headerStatItem}>
+                  <Text style={styles.headerStatValue}>{pendingSubmissions.length}</Text>
+                  <Text style={styles.headerStatLabel}>{t('dashboard.pendingValidations')}</Text>
+                </View>
+              </>
+            )}
           </View>
         </View>
       </LinearGradient>
 
-      {/* Pending Validations Alert */}
-      {pendingSubmissions.length > 0 && (
-        <Touchable onPress={() => router.push('/(parent)/missions')}>
-          <Card style={styles.alertCard}>
-            <View style={styles.alertIconContainer}>
-              <Ionicons name="alert-circle" size={20} color="#FFF" />
-            </View>
-            <View style={styles.alertContent}>
-              <Text style={styles.alertTitle}>
-                {pendingSubmissions.length} {t('dashboard.pendingValidations').toLowerCase()}
-              </Text>
-              <Text style={styles.alertSubtitle}>{t('dashboard.seeAll')}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={COLORS.warning} />
-          </Card>
-        </Touchable>
-      )}
 
       {/* Missions Section */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>{t('missions.title')}</Text>
       </View>
+
+
+      {pendingSubmissions.length > 0 && (
+        <Touchable onPress={() => router.push('/(parent)/missions')}>
+          <Card style={styles.pendingCard}>
+            <View style={styles.claimedHeader}>
+              <View style={styles.pendingBadge}>
+                <Ionicons name="checkmark-done" size={14} color={COLORS.warning} />
+                <Text style={styles.pendingBadgeText}>
+                  {pendingSubmissions.length} {t('dashboard.awaitingValidation').toLowerCase()}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={COLORS.textLight} />
+            </View>
+            {pendingSubmissions.slice(0, 3).map((ps) => {
+              const child = members.find((m) => m.id === ps.child_id);
+              const mission = missions.find((m) => m.id === ps.mission_id);
+              if (!child || !mission) return null;
+              return (
+                <View key={ps.id} style={styles.claimedItem}>
+                  <View style={[styles.claimedDot, { backgroundColor: COLORS.warning }]} />
+                  <Text style={styles.claimedDetail} numberOfLines={1}>
+                    <Text style={styles.claimedChildName}>{child.display_name}</Text>
+                    {' — '}
+                    {mission.title}
+                  </Text>
+                </View>
+              );
+            })}
+            {pendingSubmissions.length > 3 && (
+              <Text style={styles.claimedMore}>
+                +{pendingSubmissions.length - 3} ...
+              </Text>
+            )}
+          </Card>
+        </Touchable>
+      )}
 
       <View style={styles.missionCardsRow}>
         <Touchable
@@ -151,6 +180,7 @@ export default function ParentDashboard() {
           </Card>
         </Touchable>
       </View>
+
 
       {claimedSubmissions.length > 0 && (
         <Touchable onPress={() => router.push('/(parent)/missions')}>
@@ -412,6 +442,28 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F7FF',
     borderLeftWidth: 4,
     borderLeftColor: COLORS.primary,
+  },
+  // Pending validation
+  pendingCard: {
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.md,
+    backgroundColor: '#FFF9E6',
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.warning,
+  },
+  pendingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: COLORS.warning + '20',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    borderRadius: BORDER_RADIUS.full,
+  },
+  pendingBadgeText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '600',
+    color: COLORS.warning,
   },
   claimedHeader: {
     flexDirection: 'row',

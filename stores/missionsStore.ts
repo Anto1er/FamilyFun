@@ -140,13 +140,15 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
   },
 
   completeClaim: async (submissionId, familyId, note) => {
-    const { error } = await (supabase.from('mission_submissions') as any)
+    const { data, error } = await (supabase.from('mission_submissions') as any)
       .update({
         status: 'pending',
         note: note ?? null,
       })
-      .eq('id', submissionId);
+      .eq('id', submissionId)
+      .select();
     if (error) throw error;
+    if (!data || data.length === 0) throw new Error('Failed to update submission. Please try again.');
     await get().fetchSubmissions(familyId);
 
     // Notify parents that a child completed a mission

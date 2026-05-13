@@ -5,19 +5,21 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { useFamilyStore } from '@/stores/familyStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useGiftsStore } from '@/stores/giftsStore';
 import { supabase } from '@/lib/supabase';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Touchable } from '@/components/ui/Touchable';
-import { COLORS, SPACING, FONT_SIZES } from '@/lib/constants';
-import { Transaction } from '@/types';
+import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '@/lib/constants';
+import { Transaction, Gift } from '@/types';
 
 export default function ChildDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
   const router = useRouter();
   const { members, removeChild, updateChildPassword } = useFamilyStore();
+  const { gifts, fetchGifts } = useGiftsStore();
   const profile = useAuthStore((s) => s.profile);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [removing, setRemoving] = useState(false);
@@ -26,6 +28,7 @@ export default function ChildDetailScreen() {
   const [showManagement, setShowManagement] = useState(false);
 
   const child = members.find((m) => m.id === id);
+  const childGifts = gifts.filter((g) => g.child_id === id);
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -39,6 +42,9 @@ export default function ChildDetailScreen() {
       setTransactions((data as Transaction[]) ?? []);
     };
     fetchTransactions();
+    if (profile?.family_id) {
+      fetchGifts(profile.family_id);
+    }
   }, [id]);
 
   if (!child) return null;
@@ -112,14 +118,58 @@ export default function ChildDetailScreen() {
         <Text style={styles.points}>{child.points_balance} pts</Text>
       </Card>
 
-      <Text style={styles.sectionTitle}>{t('dashboard.recentActivity')}</Text>
-
-      <FlatList
-        data={transactions}
-        keyExtractor={(item) => item.id}
-        renderItem={renderTransaction}
-        contentContainerStyle={styles.list}
-      />
+      <View style={styles.columnsRow}>
+        <View style={styles.column}>
+          <Text style={styles.columnTitle}>{t('dashboard.recentActivity')}</Text>
+          <FlatList
+            data={transactions}
+            keyExtractor={(item) => item.id}
+            renderItem={renderTransaction}
+            contentContainerStyle={styles.list}
+          />
+        </View>
+        <View style={styles.column}>
+          <Text style={styles.columnTitle}>{t('dashboard.requestedWishes')}</Text>
+          {childGifts.length > 0 ? (
+            <FlatList
+              data={childGifts}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <Touchable onPress={() => router.push(`/(parent)/gifts/${item.id}`)}>
+                  <Card style={styles.giftCard}>
+                    <View style={styles.giftHeader}>
+                      <Ionicons name="gift-outline" size={16} color={COLORS.primary} />
+                      <View style={[styles.giftStatusBadge, {
+                        backgroundColor: item.status === 'approved' ? COLORS.success + '20'
+                          : item.status === 'rejected' ? COLORS.error + '20'
+                            : COLORS.warning + '20',
+                      }]}>
+                        <Text style={[styles.giftStatusText, {
+                          color: item.status === 'approved' ? COLORS.success
+                            : item.status === 'rejected' ? COLORS.error
+                              : COLORS.warning,
+                        }]}>
+                          {item.status === 'approved' ? t('gifts.approved')
+                            : item.status === 'rejected' ? t('gifts.rejected')
+                              : item.status === 'redeemed' ? t('gifts.redeemed')
+                                : t('gifts.pendingApproval')}
+                        </Text>
+                      </View>
+                    </View>
+                    <Text style={styles.giftTitle} numberOfLines={2}>{item.title}</Text>
+                    {item.points_cost != null && (
+                      <Text style={styles.giftPoints}>{item.points_cost} pts</Text>
+                    )}
+                  </Card>
+                </Touchable>
+              )}
+              contentContainerStyle={styles.list}
+            />
+          ) : (
+            <Text style={styles.emptyText}>{t('dashboard.noWishes')}</Text>
+          )}
+        </View>
+      </View>
 
       <Touchable
         style={styles.managementToggle}
@@ -212,6 +262,20 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     marginBottom: SPACING.md,
   },
+  columnsRow: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: SPACING.md,
+  },
+  column: {
+    flex: 1,
+  },
+  columnTitle: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.md,
+  },
   list: {
     paddingBottom: SPACING.lg,
   },
@@ -232,6 +296,41 @@ const styles = StyleSheet.create({
   transactionAmount: {
     fontSize: FONT_SIZES.sm,
     fontWeight: '700',
+  },
+  giftCard: {
+    marginBottom: SPACING.sm,
+    padding: SPACING.sm,
+  },
+  giftHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  giftTitle: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textPrimary,
+    fontWeight: '500',
+  },
+  giftPoints: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
+  giftStatusBadge: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: BORDER_RADIUS.full,
+  },
+  giftStatusText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '600',
+  },
+  emptyText: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textLight,
+    textAlign: 'center',
+    marginTop: SPACING.lg,
   },
   removeButton: {
     marginTop: SPACING.md,
