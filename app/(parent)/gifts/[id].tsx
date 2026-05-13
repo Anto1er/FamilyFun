@@ -9,6 +9,7 @@ import { useFamilyStore } from '@/stores/familyStore';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
+import { Touchable } from '@/components/ui/Touchable';
 import { COLORS, SPACING, FONT_SIZES } from '@/lib/constants';
 
 export default function ParentGiftDetailScreen() {
@@ -73,7 +74,20 @@ export default function ParentGiftDetailScreen() {
   return (
     <View style={styles.container}>
       <Card style={styles.card}>
-        <Ionicons name="gift" size={48} color={COLORS.secondary} />
+        <View style={styles.headerRow}>
+          <Ionicons name="gift" size={48} color={COLORS.secondary} />
+          <View style={styles.headerActions}>
+            <Touchable onPress={() => router.push(`/(parent)/gifts/edit?id=${gift.id}`)}>
+              <Ionicons name="create-outline" size={22} color={COLORS.primary} />
+            </Touchable>
+            <Touchable
+              testID="delete-btn"
+              onPress={handleDelete}
+            >
+              <Ionicons name="trash-outline" size={20} color={COLORS.error} />
+            </Touchable>
+          </View>
+        </View>
         <Text style={styles.title}>{gift.title}</Text>
         <Text style={styles.child}>{childName}</Text>
         {gift.description && <Text style={styles.description}>{gift.description}</Text>}
@@ -118,12 +132,6 @@ export default function ParentGiftDetailScreen() {
         </Card>
       )}
 
-      <Button
-        title={t('gifts.deleteGift')}
-        onPress={handleDelete}
-        variant="danger"
-        style={styles.button}
-      />
     </View>
   );
 }
@@ -137,6 +145,17 @@ const styles = StyleSheet.create({
   card: {
     alignItems: 'center',
     marginBottom: SPACING.lg,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
   },
   title: {
     fontSize: FONT_SIZES.xl,

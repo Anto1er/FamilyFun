@@ -130,6 +130,58 @@ describe('giftsStore', () => {
     });
   });
 
+  describe('updateGift', () => {
+    it('updates gift fields in local state', async () => {
+      useGiftsStore.setState({
+        gifts: [
+          { id: 'g-1', title: 'Old Title', description: 'Old desc', points_cost: 50 } as any,
+        ],
+      });
+      const chain = {
+        update: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockResolvedValue({ error: null }),
+      };
+      (supabase.from as jest.Mock).mockReturnValue(chain);
+
+      await useGiftsStore.getState().updateGift('g-1', { title: 'New Title', description: 'New desc' });
+      const state = useGiftsStore.getState();
+      expect(state.gifts[0].title).toBe('New Title');
+      expect(state.gifts[0].description).toBe('New desc');
+      expect(state.gifts[0].points_cost).toBe(50); // unchanged
+    });
+
+    it('throws on supabase error', async () => {
+      const chain = {
+        update: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockResolvedValue({ error: new Error('Update failed') }),
+      };
+      (supabase.from as jest.Mock).mockReturnValue(chain);
+
+      await expect(
+        useGiftsStore.getState().updateGift('g-1', { title: 'New Title' })
+      ).rejects.toThrow('Update failed');
+    });
+
+    it('does not modify other gifts', async () => {
+      useGiftsStore.setState({
+        gifts: [
+          { id: 'g-1', title: 'Gift 1' } as any,
+          { id: 'g-2', title: 'Gift 2' } as any,
+        ],
+      });
+      const chain = {
+        update: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockResolvedValue({ error: null }),
+      };
+      (supabase.from as jest.Mock).mockReturnValue(chain);
+
+      await useGiftsStore.getState().updateGift('g-1', { title: 'Updated' });
+      const state = useGiftsStore.getState();
+      expect(state.gifts[0].title).toBe('Updated');
+      expect(state.gifts[1].title).toBe('Gift 2');
+    });
+  });
+
   describe('deleteGift', () => {
     it('removes gift from local state', async () => {
       useGiftsStore.setState({

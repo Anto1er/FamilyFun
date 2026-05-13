@@ -9,6 +9,8 @@ import { Card } from '@/components/ui/Card';
 import { Touchable } from '@/components/ui/Touchable';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '@/lib/constants';
 
+const CHILD_COLORS = ['#6C63FF', '#FF6584', '#4CAF50', '#FF9800', '#00BCD4', '#9C27B0'];
+
 export default function FamilyScreen() {
   const { t } = useTranslation();
   const profile = useAuthStore((s) => s.profile);
@@ -58,52 +60,62 @@ export default function FamilyScreen() {
         {/* Members */}
         <Text style={styles.sectionTitle}>{t('family.members')}</Text>
         {members.length > 0 ? (
-          [...members]
-            .sort((a, b) => {
-              if (a.role === 'parent' && b.role !== 'parent') return -1;
-              if (a.role !== 'parent' && b.role === 'parent') return 1;
-              return 0;
-            })
-            .map((member) => {
-              const card = (
-                <Card key={member.id} style={styles.memberCard}>
-                  <View style={styles.memberRow}>
-                    <View style={styles.avatar}>
-                      <Ionicons
-                        name={member.role === 'parent' ? 'people' : 'happy'}
-                        size={24}
-                        color={member.role === 'parent' ? COLORS.primary : COLORS.secondary}
-                      />
-                    </View>
-                    <View style={styles.memberInfo}>
-                      <Text style={styles.memberName}>{member.display_name}</Text>
-                      <Text style={styles.memberRole}>
-                        {member.role === 'parent' ? t('family.parent') : t('family.child')}
-                        {member.role === 'child' ? ` - ${member.points_balance} pts` : ''}
-                      </Text>
-                    </View>
-                    {member.id === profile?.id && (
-                      <View style={styles.youBadge}>
-                        <Text style={styles.youBadgeText}>Vous</Text>
+          (() => {
+            let childIndex = 0;
+            return [...members]
+              .sort((a, b) => {
+                if (a.role === 'parent' && b.role !== 'parent') return -1;
+                if (a.role !== 'parent' && b.role === 'parent') return 1;
+                return 0;
+              })
+              .map((member) => {
+                const isChild = member.role === 'child';
+                const color = isChild ? CHILD_COLORS[childIndex % CHILD_COLORS.length] : COLORS.primary;
+                if (isChild) childIndex++;
+                const initial = (member.display_name ?? '?').charAt(0).toUpperCase();
+
+                const card = (
+                  <Card key={member.id} style={styles.memberCard}>
+                    <View style={styles.memberRow}>
+                      {isChild ? (
+                        <View style={[styles.avatar, { backgroundColor: color + '18' }]}>
+                          <Text style={[styles.avatarText, { color }]}>{initial}</Text>
+                        </View>
+                      ) : (
+                        <View style={[styles.avatar, { backgroundColor: COLORS.background }]}>
+                          <Ionicons name="people" size={24} color={COLORS.primary} />
+                        </View>
+                      )}
+                      <View style={styles.memberInfo}>
+                        <Text style={styles.memberName}>{member.display_name}</Text>
+                        <Text style={styles.memberRole}>
+                          {member.role === 'parent' ? t('family.parent') : t('family.child')}
+                          {isChild ? ` - ${member.points_balance} pts` : ''}
+                        </Text>
                       </View>
-                    )}
-                  </View>
-                </Card>
-              );
-
-              if (member.role === 'child') {
-                return (
-                  <Touchable
-                    key={member.id}
-                    onPress={() => router.push(`/child-detail/${member.id}`)}
-                  >
-                    {card}
-                  </Touchable>
+                      {member.id === profile?.id && (
+                        <View style={styles.youBadge}>
+                          <Text style={styles.youBadgeText}>Vous</Text>
+                        </View>
+                      )}
+                    </View>
+                  </Card>
                 );
-              }
 
-              return card;
-            })
+                if (isChild) {
+                  return (
+                    <Touchable
+                      key={member.id}
+                      onPress={() => router.push(`/child-detail/${member.id}`)}
+                    >
+                      {card}
+                    </Touchable>
+                  );
+                }
+
+                return card;
+              });
+          })()
         ) : (
           <Card style={styles.emptyCard}>
             <Text style={styles.emptyText}>{t('family.noMembers')}</Text>
@@ -184,9 +196,12 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: COLORS.background,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  avatarText: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: '700',
   },
   memberInfo: {
     flex: 1,

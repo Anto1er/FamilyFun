@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,7 +9,7 @@ import { useFamilyStore } from '@/stores/familyStore';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Touchable } from '@/components/ui/Touchable';
-import { COLORS, SPACING, FONT_SIZES } from '@/lib/constants';
+import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '@/lib/constants';
 import { MissionSubmission } from '@/types';
 
 export default function ParentMissionDetailScreen() {
@@ -17,13 +17,21 @@ export default function ParentMissionDetailScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const profile = useAuthStore((s) => s.profile);
-  const { missions, submissions, fetchSubmissions, validateSubmission, archiveMission } = useMissionsStore();
-  const { members } = useFamilyStore();
+  const { missions, submissions, fetchSubmissions, validateSubmission, archiveMission, claimMission, parentDirectValidate } = useMissionsStore();
+  const { members, fetchMembers } = useFamilyStore();
   const fetchProfile = useAuthStore((s) => s.fetchProfile);
+
+  const [assignLoading, setAssignLoading] = useState(false);
 
   const mission = missions.find((m) => m.id === id);
   const missionSubmissions = submissions.filter((s) => s.mission_id === id);
   const pendingSubmissions = missionSubmissions.filter((s) => s.status === 'pending');
+
+  const children = members.filter((m) => m.role === 'child');
+  const assignedChildIds = missionSubmissions
+    .filter((s) => s.status === 'claimed' || s.status === 'pending')
+    .map((s) => s.child_id);
+  const unassignedChildren = children.filter((c) => !assignedChildIds.includes(c.id));
 
   const getChildName = (childId: string) =>
     members.find((m) => m.id === childId)?.display_name ?? '?';
@@ -32,7 +40,32 @@ export default function ParentMissionDetailScreen() {
     if (!profile) return;
     try {
       await validateSubmission(submissionId, status, profile.id);
-      if (profile.family_id) await fetchSubmissions(profile.family_id);
+      if (profile.family_id) {
+        await fetchSubmissions(profile.family_id);
+        await fetchMembers(profile.family_id);
+      }
+    } catch (error) {
+      Alert.alert(t('common.error'), String(error));
+    }
+  };
+
+  const handleAssign = async (childId: string) => {
+    if (!profile?.family_id || !mission) return;
+    setAssignLoading(true);
+    try {
+      await claimMission(mission.id, childId, profile.family_id, true);
+    } catch (error) {
+      Alert.alert(t('common.error'), String(error));
+    } finally {
+      setAssignLoading(false);
+    }
+  };
+
+  const handleDirectValidate = async (childId: string) => {
+    if (!profile?.family_id || !profile?.id || !mission) return;
+    try {
+      await parentDirectValidate(mission.id, childId, profile.family_id, profile.id);
+      await fetchMembers(profile.family_id);
     } catch (error) {
       Alert.alert(t('common.error'), String(error));
     }
@@ -52,8 +85,8 @@ export default function ParentMissionDetailScreen() {
 
   if (!mission) return null;
 
-  const renderSubmission = ({ item }: { item: MissionSubmission }) => (
-    <Card style={styles.submissionCard}>
+  const renderSubmission = (item: MissionSubmission) => (
+    <Card key={item.id} style={styles.submissionCard}>
       <View style={styles.submissionHeader}>
         <Text style={styles.childName}>{getChildName(item.child_id)}</Text>
         <Text style={styles.submissionDate}>
@@ -62,9 +95,16 @@ export default function ParentMissionDetailScreen() {
       </View>
       {item.note && <Text style={styles.note}>{item.note}</Text>}
       {item.status === 'claimed' ? (
-        <Text style={[styles.statusText, { color: COLORS.primary }]}>
-          {t('missions.claimed')}
-        </Text>
+        <View style={styles.actions}>
+          <Text style={[styles.statusText, { color: COLORS.primary, flex: 1 }]}>
+            {t('missions.claimed')}
+          </Text>
+          <Button
+            title={t('missions.validateDirectly')}
+            onPress={() => handleValidate(item.id, 'approved')}
+            size="sm"
+          />
+        </View>
       ) : item.status === 'pending' ? (
         <View style={styles.actions}>
           <Button
@@ -94,7 +134,7 @@ export default function ParentMissionDetailScreen() {
   );
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Card style={styles.headerCard}>
         <View style={styles.headerRow}>
           <View style={{ flex: 1 }}>
@@ -102,30 +142,62 @@ export default function ParentMissionDetailScreen() {
             {mission.description && <Text style={styles.description}>{mission.description}</Text>}
             <Text style={styles.points}>+{mission.points_reward} pts</Text>
           </View>
-          <Touchable onPress={() => router.push(`/(parent)/missions/edit?id=${mission.id}`)}>
-            <Ionicons name="create-outline" size={24} color={COLORS.primary} />
-          </Touchable>
+          <View style={styles.headerActions}>
+            <Touchable onPress={() => router.push(`/(parent)/missions/edit?id=${mission.id}`)}>
+              <Ionicons name="create-outline" size={22} color={COLORS.primary} />
+            </Touchable>
+            <Touchable
+              testID="delete-btn"
+              onPress={handleArchive}
+            >
+              <Ionicons name="trash-outline" size={20} color={COLORS.error} />
+            </Touchable>
+          </View>
         </View>
       </Card>
 
-      <Text style={styles.sectionTitle}>
-        {t('missions.pendingSubmissions')} ({pendingSubmissions.length})
-      </Text>
+      {missionSubmissions.length > 0 && (
+        <>
+          <Text style={styles.sectionTitle}>
+            {t('missions.pendingSubmissions')} ({pendingSubmissions.length})
+          </Text>
+          {missionSubmissions.map(renderSubmission)}
+        </>
+      )}
 
-      <FlatList
-        data={missionSubmissions}
-        keyExtractor={(item) => item.id}
-        renderItem={renderSubmission}
-        contentContainerStyle={styles.list}
-      />
+      {unassignedChildren.length > 0 && (
+        <>
+          <Text style={styles.sectionTitle}>{t('missions.quickActions')}</Text>
+          {unassignedChildren.map((child) => (
+            <View key={child.id} style={styles.childActionRow}>
+              <View style={styles.childActionName}>
+                <Ionicons name="person-outline" size={18} color={COLORS.textSecondary} />
+                <Text style={styles.childActionText}>{child.display_name}</Text>
+              </View>
+              <View style={styles.childActionButtons}>
+                <Touchable
+                  style={styles.actionIconBtn}
+                  onPress={() => handleAssign(child.id)}
+                  disabled={assignLoading}
+                >
+                  <Ionicons name="person-add-outline" size={18} color={COLORS.primary} />
+                  <Text style={styles.actionIconLabel}>{t('missions.assign')}</Text>
+                </Touchable>
+                <View style={styles.actionSeparator} />
+                <Touchable
+                  style={styles.actionIconBtn}
+                  onPress={() => handleDirectValidate(child.id)}
+                >
+                  <Ionicons name="checkmark-circle-outline" size={18} color={COLORS.success} />
+                  <Text style={[styles.actionIconLabel, { color: COLORS.success }]}>{t('missions.validate')}</Text>
+                </Touchable>
+              </View>
+            </View>
+          ))}
+        </>
+      )}
 
-      <Button
-        title={t('common.delete')}
-        onPress={handleArchive}
-        variant="outline"
-        style={styles.archiveBtn}
-      />
-    </View>
+    </ScrollView>
   );
 }
 
@@ -133,7 +205,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  content: {
     padding: SPACING.lg,
+    paddingBottom: SPACING.xxl,
   },
   headerCard: {
     marginBottom: SPACING.lg,
@@ -142,6 +217,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
   },
   missionTitle: {
     fontSize: FONT_SIZES.xl,
@@ -163,13 +243,11 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.md,
     fontWeight: '600',
     color: COLORS.textPrimary,
-    marginBottom: SPACING.md,
-  },
-  list: {
-    paddingBottom: SPACING.lg,
+    marginBottom: SPACING.sm,
+    marginTop: SPACING.sm,
   },
   submissionCard: {
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
   },
   submissionHeader: {
     flexDirection: 'row',
@@ -194,6 +272,7 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     gap: SPACING.sm,
+    alignItems: 'center',
   },
   approveBtn: {
     flex: 1,
@@ -202,7 +281,46 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     fontWeight: '600',
   },
-  archiveBtn: {
-    marginTop: SPACING.md,
+  childActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: COLORS.surface,
+    borderRadius: BORDER_RADIUS.md,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.xs,
+  },
+  childActionName: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  childActionText: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: '500',
+    color: COLORS.textPrimary,
+  },
+  childActionButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  actionIconBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+  },
+  actionIconLabel: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '600',
+    color: COLORS.primary,
+  },
+  actionSeparator: {
+    width: 1,
+    height: 20,
+    backgroundColor: COLORS.border,
   },
 });

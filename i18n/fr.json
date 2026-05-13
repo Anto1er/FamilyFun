@@ -7,6 +7,7 @@
     "cancel": "Annuler",
     "delete": "Supprimer",
     "confirm": "Confirmer",
+    "actions": "Actions",
     "back": "Retour",
     "points": "points",
     "pts": "pts"
@@ -78,7 +79,12 @@
     "complete": "Mission accomplie !",
     "assignTo": "Attribuer a",
     "everyone": "Tout le monde",
-    "noOne": "Personne"
+    "noOne": "Personne",
+    "validateDirectly": "Valider directement",
+    "validateFor": "Valider pour",
+    "quickActions": "Actions rapides",
+    "assign": "Attribuer",
+    "validate": "Valider"
   },
   "gifts": {
     "title": "Liste de souhaits",
@@ -101,7 +107,8 @@
     "deleteGift": "Supprimer le souhait",
     "deleteGiftConfirm": "Veux-tu vraiment supprimer ce souhait ?",
     "selectChild": "Pour qui ?",
-    "wholeFamily": "Toute la famille"
+    "wholeFamily": "Toute la famille",
+    "editGift": "Modifier le souhait"
   },
   "dashboard": {
     "parentTitle": "Tableau de bord",

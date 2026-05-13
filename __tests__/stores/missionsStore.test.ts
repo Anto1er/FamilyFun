@@ -293,4 +293,119 @@ describe('missionsStore', () => {
       expect(mockUpdate).toHaveBeenCalled();
     });
   });
+
+  describe('parentDirectValidate', () => {
+    it('inserts claimed submission then updates to approved', async () => {
+      useMissionsStore.setState({
+        missions: [{ id: 'm-1', title: 'Clean room', points_reward: 10 } as any],
+      });
+
+      const insertChain = {
+        insert: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({ data: { id: 's-new' }, error: null }),
+      };
+      const updateChain = {
+        update: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockResolvedValue({ error: null }),
+      };
+      const fetchSubsChain = {
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        order: jest.fn().mockResolvedValue({ data: [{ id: 's-new', status: 'approved' }], error: null }),
+      };
+
+      (supabase.from as jest.Mock)
+        .mockReturnValueOnce(insertChain)       // insert as claimed
+        .mockReturnValueOnce(updateChain)       // update to approved
+        .mockReturnValueOnce(fetchSubsChain);   // fetchSubmissions
+
+      await useMissionsStore.getState().parentDirectValidate('m-1', 'child-1', 'fam-1', 'parent-1');
+      expect(insertChain.insert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mission_id: 'm-1',
+          child_id: 'child-1',
+          family_id: 'fam-1',
+          status: 'claimed',
+        })
+      );
+      expect(updateChain.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'approved',
+          validated_by: 'parent-1',
+        })
+      );
+    });
+
+    it('throws on insert error', async () => {
+      const insertChain = {
+        insert: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({ data: null, error: new Error('Insert failed') }),
+      };
+
+      (supabase.from as jest.Mock).mockReturnValueOnce(insertChain);
+
+      await expect(
+        useMissionsStore.getState().parentDirectValidate('m-1', 'child-1', 'fam-1', 'parent-1')
+      ).rejects.toThrow('Insert failed');
+    });
+
+    it('throws on update error', async () => {
+      const insertChain = {
+        insert: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({ data: { id: 's-new' }, error: null }),
+      };
+      const updateChain = {
+        update: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockResolvedValue({ error: new Error('Update failed') }),
+      };
+
+      (supabase.from as jest.Mock)
+        .mockReturnValueOnce(insertChain)
+        .mockReturnValueOnce(updateChain);
+
+      await expect(
+        useMissionsStore.getState().parentDirectValidate('m-1', 'child-1', 'fam-1', 'parent-1')
+      ).rejects.toThrow('Update failed');
+    });
+
+    it('notifies child after direct validation', async () => {
+      useMissionsStore.setState({
+        missions: [{ id: 'm-1', title: 'Clean room', points_reward: 10 } as any],
+      });
+
+      const insertChain = {
+        insert: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({ data: { id: 's-new' }, error: null }),
+      };
+      const updateChain = {
+        update: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockResolvedValue({ error: null }),
+      };
+      const fetchSubsChain = {
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        order: jest.fn().mockResolvedValue({ data: [], error: null }),
+      };
+
+      (supabase.from as jest.Mock)
+        .mockReturnValueOnce(insertChain)
+        .mockReturnValueOnce(updateChain)
+        .mockReturnValueOnce(fetchSubsChain);
+
+      const { notifyChild } = require('@/lib/notifications');
+      await useMissionsStore.getState().parentDirectValidate('m-1', 'child-1', 'fam-1', 'parent-1');
+      expect(notifyChild).toHaveBeenCalledWith(
+        'child-1',
+        'fam-1',
+        'Mission validee',
+        expect.stringContaining('Clean room'),
+        'mission_validated',
+        expect.any(Object)
+      );
+    });
+  });
 });

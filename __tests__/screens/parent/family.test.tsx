@@ -70,6 +70,11 @@ describe('FamilyScreen', () => {
     render(<FamilyScreen />);
     expect(screen.getByText(/50 pts/)).toBeTruthy();
   });
+
+  it('renders initial letter for child avatar', () => {
+    render(<FamilyScreen />);
+    expect(screen.getByText('A')).toBeTruthy();
+  });
 });
 
 describe('FamilyScreen - empty members', () => {

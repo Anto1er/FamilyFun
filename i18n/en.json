@@ -7,6 +7,7 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "confirm": "Confirm",
+    "actions": "Actions",
     "back": "Back",
     "points": "points",
     "pts": "pts"
@@ -78,7 +79,12 @@
     "complete": "Mission complete!",
     "assignTo": "Assign to",
     "everyone": "Everyone",
-    "noOne": "No one"
+    "noOne": "No one",
+    "validateDirectly": "Validate directly",
+    "validateFor": "Validate for",
+    "quickActions": "Quick actions",
+    "assign": "Assign",
+    "validate": "Validate"
   },
   "gifts": {
     "title": "Wishlist",
@@ -101,7 +107,8 @@
     "deleteGift": "Delete wish",
     "deleteGiftConfirm": "Do you really want to delete this wish?",
     "selectChild": "Who is this for?",
-    "wholeFamily": "Whole family"
+    "wholeFamily": "Whole family",
+    "editGift": "Edit wish"
   },
   "dashboard": {
     "parentTitle": "Dashboard",

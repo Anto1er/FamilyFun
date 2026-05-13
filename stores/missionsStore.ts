@@ -17,6 +17,7 @@ interface MissionsState {
   submitMission: (missionId: string, childId: string, familyId: string, note?: string) => Promise<void>;
   completeClaim: (submissionId: string, familyId: string, note?: string) => Promise<void>;
   validateSubmission: (submissionId: string, status: 'approved' | 'rejected', validatedBy: string) => Promise<void>;
+  parentDirectValidate: (missionId: string, childId: string, familyId: string, validatedBy: string) => Promise<void>;
 }
 
 export const useMissionsStore = create<MissionsState>((set, get) => ({
@@ -209,6 +210,45 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
           { screen: '(child)/missions', missionId: mission.id }
         ).catch(() => { });
       }
+    }
+  },
+
+  parentDirectValidate: async (missionId, childId, familyId, validatedBy) => {
+    // Step 1: Insert submission as 'claimed'
+    const { data, error: insertError } = await (supabase.from('mission_submissions') as any)
+      .insert({
+        mission_id: missionId,
+        child_id: childId,
+        family_id: familyId,
+        status: 'claimed',
+      })
+      .select('id')
+      .single();
+    if (insertError) throw insertError;
+
+    // Step 2: Update to 'approved' so the AFTER UPDATE trigger fires and credits points
+    const { error: updateError } = await (supabase.from('mission_submissions') as any)
+      .update({
+        status: 'approved',
+        validated_by: validatedBy,
+        validated_at: new Date().toISOString(),
+      })
+      .eq('id', data.id);
+    if (updateError) throw updateError;
+
+    await get().fetchSubmissions(familyId);
+
+    // Notify the child
+    const mission = get().missions.find((m) => m.id === missionId);
+    if (mission) {
+      notifyChild(
+        childId,
+        familyId,
+        'Mission validee',
+        `Ta mission "${mission.title}" a ete approuvee ! Tu as gagne ${mission.points_reward} points`,
+        'mission_validated',
+        { screen: '(child)/missions', missionId }
+      ).catch(() => { });
     }
   },
 }));

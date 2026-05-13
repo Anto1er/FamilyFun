@@ -3,9 +3,11 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react-nativ
 import { Alert, TextInput } from 'react-native';
 import ParentGiftDetailScreen from '@/app/(parent)/gifts/[id]';
 
+const mockPush = jest.fn();
+
 jest.mock('expo-router', () => ({
   useLocalSearchParams: () => ({ id: 'g-1' }),
-  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
+  useRouter: () => ({ push: mockPush, replace: jest.fn(), back: jest.fn() }),
 }));
 
 const mockApproveGift = jest.fn();
@@ -63,15 +65,10 @@ describe('ParentGiftDetailScreen', () => {
     expect(screen.getByText('gifts.setCost')).toBeTruthy();
   });
 
-  it('renders delete button', () => {
-    render(<ParentGiftDetailScreen />);
-    expect(screen.getByText('gifts.deleteGift')).toBeTruthy();
-  });
-
-  it('shows confirmation alert on delete', () => {
+  it('shows delete confirmation when delete icon pressed', () => {
     const alertSpy = jest.spyOn(Alert, 'alert');
     render(<ParentGiftDetailScreen />);
-    fireEvent.press(screen.getByText('gifts.deleteGift'));
+    fireEvent.press(screen.getByTestId('delete-btn'));
     expect(alertSpy).toHaveBeenCalledWith(
       'gifts.deleteGift',
       'gifts.deleteGiftConfirm',
@@ -107,6 +104,80 @@ describe('ParentGiftDetailScreen', () => {
 
     await waitFor(() => {
       expect(mockRejectGift).toHaveBeenCalledWith('g-1');
+    });
+  });
+
+  it('returns null when gift not found', () => {
+    mockGifts.length = 0;
+    const { toJSON } = render(<ParentGiftDetailScreen />);
+    expect(toJSON()).toBeNull();
+  });
+
+  it('renders gift without description', () => {
+    mockGifts[0] = { ...mockGifts[0], description: null };
+    render(<ParentGiftDetailScreen />);
+    expect(screen.getByText('Nintendo Switch')).toBeTruthy();
+    expect(screen.queryByText('OLED version')).toBeNull();
+  });
+
+  it('renders gift without link_url', () => {
+    mockGifts[0] = { ...mockGifts[0], link_url: null };
+    render(<ParentGiftDetailScreen />);
+    expect(screen.queryByText('https://example.com')).toBeNull();
+  });
+
+  it('shows error alert when approve fails', async () => {
+    mockApproveGift.mockRejectedValueOnce(new Error('Approve failed'));
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    render(<ParentGiftDetailScreen />);
+
+    const inputs = screen.UNSAFE_getAllByType(TextInput);
+    fireEvent.changeText(inputs[0], '50');
+    fireEvent.press(screen.getByText('gifts.approve'));
+
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith('common.error', expect.stringContaining('Approve failed'));
+    });
+  });
+
+  it('shows error alert when reject fails', async () => {
+    mockRejectGift.mockRejectedValueOnce(new Error('Reject failed'));
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    render(<ParentGiftDetailScreen />);
+    fireEvent.press(screen.getByText('gifts.reject'));
+
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith('common.error', expect.stringContaining('Reject failed'));
+    });
+  });
+
+  it('calls deleteGift when confirm pressed in delete dialog', async () => {
+    mockDeleteGift.mockResolvedValueOnce(undefined);
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    render(<ParentGiftDetailScreen />);
+
+    fireEvent.press(screen.getByTestId('delete-btn'));
+
+    const buttons = alertSpy.mock.calls[0][2] as any[];
+    const deleteButton = buttons.find((b: any) => b.style === 'destructive');
+    await deleteButton.onPress();
+
+    expect(mockDeleteGift).toHaveBeenCalledWith('g-1');
+  });
+
+  it('shows error alert when delete fails', async () => {
+    mockDeleteGift.mockRejectedValueOnce(new Error('Delete failed'));
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    render(<ParentGiftDetailScreen />);
+
+    fireEvent.press(screen.getByTestId('delete-btn'));
+
+    const buttons = alertSpy.mock.calls[0][2] as any[];
+    const deleteButton = buttons.find((b: any) => b.style === 'destructive');
+    await deleteButton.onPress();
+
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith('common.error', expect.stringContaining('Delete failed'));
     });
   });
 });

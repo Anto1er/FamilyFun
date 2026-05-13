@@ -1,0 +1,108 @@
+import React, { useState } from 'react';
+import { View, StyleSheet, Alert, ScrollView } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import { useGiftsStore } from '@/stores/giftsStore';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { COLORS, SPACING } from '@/lib/constants';
+
+export default function EditGiftScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { t } = useTranslation();
+  const router = useRouter();
+  const { gifts, updateGift } = useGiftsStore();
+
+  const gift = gifts.find((g) => g.id === id);
+
+  const [title, setTitle] = useState(gift?.title ?? '');
+  const [description, setDescription] = useState(gift?.description ?? '');
+  const [imageUrl, setImageUrl] = useState(gift?.image_url ?? '');
+  const [linkUrl, setLinkUrl] = useState(gift?.link_url ?? '');
+  const [pointsCost, setPointsCost] = useState(gift?.points_cost ? String(gift.points_cost) : '');
+  const [loading, setLoading] = useState(false);
+
+  if (!gift) return null;
+
+  const handleSave = async () => {
+    if (!title) return;
+    setLoading(true);
+    try {
+      await updateGift(gift.id, {
+        title,
+        description: description || null,
+        image_url: imageUrl || null,
+        link_url: linkUrl || null,
+        points_cost: pointsCost ? parseInt(pointsCost, 10) : null,
+      });
+      router.back();
+    } catch (error) {
+      Alert.alert(t('common.error'), String(error));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <Input
+        label={t('gifts.giftTitle')}
+        value={title}
+        onChangeText={setTitle}
+        placeholder="Ex: Nintendo Switch"
+      />
+
+      <Input
+        label={t('gifts.description')}
+        value={description}
+        onChangeText={setDescription}
+        multiline
+        numberOfLines={3}
+      />
+
+      <Input
+        label={t('gifts.pointsCost')}
+        value={pointsCost}
+        onChangeText={setPointsCost}
+        keyboardType="numeric"
+      />
+
+      <Input
+        label={t('gifts.imageUrl')}
+        value={imageUrl}
+        onChangeText={setImageUrl}
+        keyboardType="url"
+        autoCapitalize="none"
+      />
+
+      <Input
+        label={t('gifts.linkUrl')}
+        value={linkUrl}
+        onChangeText={setLinkUrl}
+        keyboardType="url"
+        autoCapitalize="none"
+      />
+
+      <Button
+        title={t('common.save')}
+        onPress={handleSave}
+        loading={loading}
+        disabled={!title}
+        style={styles.button}
+      />
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  content: {
+    padding: SPACING.lg,
+  },
+  button: {
+    marginTop: SPACING.md,
+  },
+});
