@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, View, Text, StyleSheet, RefreshControl } from 'react-native';
+import { FlatList, View, Text, StyleSheet, RefreshControl, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,6 +19,7 @@ export default function ParentGiftsScreen() {
   const { gifts, loading, fetchGifts } = useGiftsStore();
   const { members } = useFamilyStore();
   const [refreshing, setRefreshing] = useState(false);
+  const [search, setSearch] = useState('');
 
   const familyId = profile?.family_id;
   const pendingGifts = gifts.filter((g) => g.status === 'pending_approval');
@@ -61,15 +62,37 @@ export default function ParentGiftsScreen() {
 
   const allGifts = [...pendingGifts, ...approvedGifts];
 
+  const normalize = (str: string) =>
+    str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+  const filteredGifts = allGifts.filter((g) =>
+    normalize(g.title).includes(normalize(search))
+  );
+
   return (
     <View style={styles.wrapper}>
       <FlatList
         style={styles.container}
         contentContainerStyle={styles.list}
-        data={allGifts}
+        showsVerticalScrollIndicator={false}
+        data={filteredGifts}
         keyExtractor={(item) => item.id}
         renderItem={renderGift}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        ListHeaderComponent={
+          allGifts.length > 0 ? (
+            <View style={styles.searchContainer}>
+              <Ionicons name="search" size={18} color={COLORS.textLight} style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder={t('gifts.search')}
+                placeholderTextColor={COLORS.textLight}
+                value={search}
+                onChangeText={setSearch}
+              />
+            </View>
+          ) : null
+        }
         ListEmptyComponent={
           !loading ? <EmptyState icon="gift-outline" title={t('gifts.noGifts')} /> : null
         }
@@ -91,6 +114,25 @@ const styles = StyleSheet.create({
   },
   list: {
     padding: SPACING.lg,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: BORDER_RADIUS.md,
+    marginBottom: SPACING.md,
+  },
+  searchIcon: {
+    paddingLeft: SPACING.md,
+  },
+  searchInput: {
+    flex: 1,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.md,
+    fontSize: FONT_SIZES.md,
+    color: COLORS.textPrimary,
   },
   giftCard: {
     marginBottom: SPACING.md,

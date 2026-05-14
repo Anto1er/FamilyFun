@@ -84,7 +84,8 @@
     "validateFor": "Valider pour",
     "quickActions": "Actions rapides",
     "assign": "Attribuer",
-    "validate": "Valider"
+    "validate": "Valider",
+    "search": "Rechercher une mission..."
   },
   "gifts": {
     "title": "Liste de souhaits",
@@ -111,7 +112,8 @@
     "editGift": "Modifier le souhait",
     "redeemFor": "Echanger pour {{name}}",
     "redeemConfirm": "{{name}} va depenser {{cost}} points pour « {{gift}} ». Il lui restera {{remaining}} points.",
-    "childBalance": "Solde de {{name}}"
+    "childBalance": "Solde de {{name}}",
+    "search": "Rechercher un souhait..."
   },
   "dashboard": {
     "parentTitle": "Tableau de bord",

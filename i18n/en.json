@@ -84,7 +84,8 @@
     "validateFor": "Validate for",
     "quickActions": "Quick actions",
     "assign": "Assign",
-    "validate": "Validate"
+    "validate": "Validate",
+    "search": "Search a mission..."
   },
   "gifts": {
     "title": "Wishlist",
@@ -111,7 +112,8 @@
     "editGift": "Edit wish",
     "redeemFor": "Redeem for {{name}}",
     "redeemConfirm": "{{name}} will spend {{cost}} points on '{{gift}}'. They will have {{remaining}} points remaining.",
-    "childBalance": "{{name}}'s balance"
+    "childBalance": "{{name}}'s balance",
+    "search": "Search a wish..."
   },
   "dashboard": {
     "parentTitle": "Dashboard",

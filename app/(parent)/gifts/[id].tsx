@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, Linking } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -132,7 +132,9 @@ export default function ParentGiftDetailScreen() {
         <Text style={styles.child}>{childName}</Text>
         {gift.description && <Text style={styles.description}>{gift.description}</Text>}
         {gift.link_url && (
-          <Text style={styles.link} numberOfLines={1}>{gift.link_url}</Text>
+          <Touchable onPress={() => Linking.openURL(gift.link_url!)}>
+            <Text style={styles.link} numberOfLines={1}>{gift.link_url}</Text>
+          </Touchable>
         )}
       </Card>
 
@@ -247,6 +249,7 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     color: COLORS.primary,
     marginTop: SPACING.sm,
+    textDecorationLine: 'underline',
   },
   actions: {
     marginTop: SPACING.md,

@@ -55,7 +55,7 @@ export default function ParentLayout() {
         }}
       />
       {/* Hide sub-routes from tabs */}
-      <Tabs.Screen name="missions" options={{ href: null }} />
+      <Tabs.Screen name="missions" options={{ href: null, title: t('missions.title') }} />
       <Tabs.Screen name="add-child" options={{ href: null }} />
       <Tabs.Screen name="notifications" options={{ href: null }} />
     </Tabs>

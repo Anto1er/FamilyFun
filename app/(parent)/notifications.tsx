@@ -82,6 +82,7 @@ export default function ParentNotificationsScreen() {
       )}
       <FlatList
         contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
         data={notifications}
         keyExtractor={(item) => item.id}
         renderItem={renderNotification}

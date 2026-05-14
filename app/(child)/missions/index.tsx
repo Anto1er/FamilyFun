@@ -87,6 +87,7 @@ export default function ChildMissionsScreen() {
     <FlatList
       style={styles.container}
       contentContainerStyle={styles.list}
+      showsVerticalScrollIndicator={false}
       data={missions}
       keyExtractor={(item) => item.id}
       renderItem={renderMission}

@@ -50,7 +50,7 @@ export default function EditMissionScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <Input
         label={t('missions.missionTitle')}
         value={title}

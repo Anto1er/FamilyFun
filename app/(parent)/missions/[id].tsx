@@ -81,7 +81,10 @@ export default function ParentMissionDetailScreen() {
       {
         text: t('common.confirm'),
         onPress: async () => {
-          if (mission) await archiveMission(mission.id);
+          if (mission) {
+            await archiveMission(mission.id);
+            router.back();
+          }
         },
       },
     ]);
@@ -140,7 +143,7 @@ export default function ParentMissionDetailScreen() {
   );
 
   const content = (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <Card style={styles.headerCard}>
         <View style={styles.headerRow}>
           <View style={{ flex: 1 }}>

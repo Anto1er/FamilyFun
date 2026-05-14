@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, RefreshControl } from 'react-native';
+import { View, Text, FlatList, StyleSheet, RefreshControl, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +20,7 @@ export default function ParentMissionsScreen() {
   const { missions, submissions, loading, fetchMissions, fetchSubmissions } = useMissionsStore();
   const { members } = useFamilyStore();
   const [refreshing, setRefreshing] = useState(false);
+  const [search, setSearch] = useState('');
 
   const familyId = profile?.family_id;
 
@@ -53,6 +54,13 @@ export default function ParentMissionsScreen() {
     return bClaimed - aClaimed;
   });
 
+  const normalize = (str: string) =>
+    str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+  const filteredMissions = sortedMissions.filter((m) =>
+    normalize(m.title).includes(normalize(search))
+  );
+
   const renderMission = ({ item }: { item: Mission }) => {
     const pendingCount = getPendingCount(item.id);
     const claimedNames = getClaimedChildren(item.id);
@@ -85,10 +93,25 @@ export default function ParentMissionsScreen() {
     <View style={styles.container}>
       <FlatList
         contentContainerStyle={styles.list}
-        data={sortedMissions}
+        showsVerticalScrollIndicator={false}
+        data={filteredMissions}
         keyExtractor={(item) => item.id}
         renderItem={renderMission}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        ListHeaderComponent={
+          missions.length > 0 ? (
+            <View style={styles.searchContainer}>
+              <Ionicons name="search" size={18} color={COLORS.textLight} style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder={t('missions.search')}
+                placeholderTextColor={COLORS.textLight}
+                value={search}
+                onChangeText={setSearch}
+              />
+            </View>
+          ) : null
+        }
         ListEmptyComponent={
           !loading ? <EmptyState icon="rocket-outline" title={t('missions.noMissions')} /> : null
         }
@@ -113,6 +136,25 @@ const styles = StyleSheet.create({
   list: {
     padding: SPACING.lg,
     paddingBottom: 80,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: BORDER_RADIUS.md,
+    marginBottom: SPACING.md,
+  },
+  searchIcon: {
+    paddingLeft: SPACING.md,
+  },
+  searchInput: {
+    flex: 1,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.md,
+    fontSize: FONT_SIZES.md,
+    color: COLORS.textPrimary,
   },
   missionCard: {
     marginBottom: SPACING.md,

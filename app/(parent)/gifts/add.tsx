@@ -73,7 +73,7 @@ export default function ParentAddGiftScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <Text style={styles.sectionLabel}>{t('gifts.selectChild')}</Text>
       <View style={styles.childrenRow}>
         <Touchable onPress={toggleAllFamily}>

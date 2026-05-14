@@ -40,6 +40,7 @@ export default function FamilyScreen() {
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {/* Family Name */}

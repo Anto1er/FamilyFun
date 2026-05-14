@@ -67,6 +67,7 @@ export default function HistoryScreen() {
     <FlatList
       style={styles.container}
       contentContainerStyle={styles.list}
+      showsVerticalScrollIndicator={false}
       data={transactions}
       keyExtractor={(item) => item.id}
       renderItem={renderTransaction}

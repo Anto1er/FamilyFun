@@ -102,7 +102,7 @@ export default function RegisterScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>FamilyQuest</Text>
         <Text style={styles.subtitle}>
           {t('auth.register')} - {isChild ? t('roles.child') : t('roles.parent')}

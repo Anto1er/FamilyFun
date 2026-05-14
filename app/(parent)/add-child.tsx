@@ -32,7 +32,7 @@ export default function AddChildScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <Input
         label={t('auth.displayName')}
         value={displayName}

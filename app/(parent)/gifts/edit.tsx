@@ -44,7 +44,7 @@ export default function EditGiftScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <Input
         label={t('gifts.giftTitle')}
         value={title}

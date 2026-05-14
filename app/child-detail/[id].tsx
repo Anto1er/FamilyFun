@@ -128,6 +128,7 @@ export default function ChildDetailScreen() {
             keyExtractor={(item) => item.id}
             renderItem={renderTransaction}
             contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
           />
         </View>
         <View style={styles.column}>
@@ -135,6 +136,7 @@ export default function ChildDetailScreen() {
           {childGifts.length > 0 ? (
             <FlatList
               data={childGifts}
+              showsVerticalScrollIndicator={false}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <Touchable onPress={() => router.push(`/(parent)/gifts/${item.id}`)}>

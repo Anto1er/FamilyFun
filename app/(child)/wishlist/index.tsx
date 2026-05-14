@@ -75,6 +75,7 @@ export default function ChildWishlistScreen() {
     <View style={styles.container}>
       <FlatList
         contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
         data={myGifts}
         keyExtractor={(item) => item.id}
         renderItem={renderGift}
