@@ -145,3 +145,56 @@ jest.spyOn(console, 'log').mockImplementation(() => { });
 
 // Mock Alert
 jest.spyOn(require('react-native').Alert, 'alert').mockImplementation(() => { });
+
+// Mock react-native-gesture-handler
+jest.mock('react-native-gesture-handler', () => {
+  const View = require('react-native').View;
+  return {
+    GestureHandlerRootView: View,
+    GestureDetector: ({ children }) => children,
+    Gesture: {
+      Pan: () => ({
+        onStart: jest.fn().mockReturnThis(),
+        onUpdate: jest.fn().mockReturnThis(),
+        onEnd: jest.fn().mockReturnThis(),
+      }),
+      LongPress: () => ({
+        minDuration: jest.fn().mockReturnThis(),
+        onEnd: jest.fn().mockReturnThis(),
+      }),
+      Race: jest.fn((...gestures) => gestures[0]),
+    },
+  };
+});
+
+// Mock react-native-reanimated
+jest.mock('react-native-reanimated', () => {
+  const RN = require('react-native');
+  const Animated = {
+    View: RN.View,
+    Text: RN.Text,
+    Image: RN.Image,
+    ScrollView: RN.ScrollView,
+    FlatList: RN.FlatList,
+    createAnimatedComponent: (comp) => comp,
+  };
+  return {
+    __esModule: true,
+    default: Animated,
+    useSharedValue: (init) => ({ value: init }),
+    useAnimatedStyle: () => ({}),
+    withTiming: (val) => val,
+    withSpring: (val) => val,
+    withSequence: (...vals) => vals[vals.length - 1],
+    withDelay: (_delay, val) => val,
+    runOnJS: (fn) => fn,
+    Easing: {
+      bezier: () => ({}),
+      out: () => ({}),
+      in: () => ({}),
+      inOut: () => ({}),
+      cubic: {},
+      linear: {},
+    },
+  };
+});

@@ -223,6 +223,7 @@ export function BoardCanvas({ childId }: BoardCanvasProps) {
               <Touchable
                 key={icon}
                 style={styles.pickerItem}
+                testID={`sticker-${icon}`}
                 onPress={() => addItem('sticker', icon, SHAPE_COLORS[Math.floor(Math.random() * SHAPE_COLORS.length)])}
               >
                 <Ionicons name={icon} size={28} color={COLORS.primary} />
@@ -237,10 +238,10 @@ export function BoardCanvas({ childId }: BoardCanvasProps) {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pickerContent}>
             {SHAPE_COLORS.map((color) => (
               <React.Fragment key={color}>
-                <Touchable style={styles.pickerItem} onPress={() => addItem('shape', 'circle', color, 'circle')}>
+                <Touchable style={styles.pickerItem} testID={`shape-circle-${color}`} onPress={() => addItem('shape', 'circle', color, 'circle')}>
                   <View style={[styles.shapeCirclePreview, { backgroundColor: color }]} />
                 </Touchable>
-                <Touchable style={styles.pickerItem} onPress={() => addItem('shape', 'square', color, 'square')}>
+                <Touchable style={styles.pickerItem} testID={`shape-square-${color}`} onPress={() => addItem('shape', 'square', color, 'square')}>
                   <View style={[styles.shapeSquarePreview, { backgroundColor: color }]} />
                 </Touchable>
               </React.Fragment>
