@@ -100,6 +100,22 @@ export default function ChildDashboard() {
           </Card>
         </Touchable>
       </View>
+
+      {/* Whiteboard Card */}
+      <Touchable
+        style={styles.boardRow}
+        onPress={() => router.push('/(child)/board')}
+      >
+        <Card style={styles.boardCard}>
+          <View style={[styles.statIconContainer, { backgroundColor: COLORS.success + '14' }]}>
+            <Ionicons name="color-palette" size={22} color={COLORS.success} />
+          </View>
+          <Text style={styles.statLabel}>{t('board.title')}</Text>
+          <View style={styles.statChevron}>
+            <Ionicons name="chevron-forward" size={14} color={COLORS.textLight} />
+          </View>
+        </Card>
+      </Touchable>
     </ScrollView>
   );
 }
@@ -152,6 +168,15 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.md,
+  },
+  boardRow: {
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.md,
+  },
+  boardCard: {
+    alignItems: 'center',
+    paddingVertical: SPACING.xl,
+    paddingHorizontal: SPACING.lg,
   },
   statCard: {
     flex: 1,

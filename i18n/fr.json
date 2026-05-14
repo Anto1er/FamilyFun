@@ -129,7 +129,8 @@
     "activeMissions": "actives",
     "seeAll": "Voir tout",
     "noPendingActions": "Tout est a jour !",
-    "childPoints": "{{points}} pts"
+    "childPoints": "{{points}} pts",
+    "extras": "Extras"
   },
   "history": {
     "title": "Historique",
@@ -159,5 +160,14 @@
     "english": "Anglais",
     "familyCode": "Code famille",
     "profile": "Profil"
+  },
+  "board": {
+    "title": "Tableau de récompenses",
+    "viewBoard": "Voir le tableau de l'enfant",
+    "emojis": "Emojis",
+    "stickers": "Stickers",
+    "shapes": "Formes",
+    "clear": "Tout effacer",
+    "clearConfirm": "Effacer tout le tableau ?"
   }
 }

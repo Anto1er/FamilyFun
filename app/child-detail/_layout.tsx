@@ -12,6 +12,9 @@ export default function ChildDetailLayout() {
         headerTintColor: COLORS.textPrimary,
         title: '',
       }}
-    />
+    >
+      <Stack.Screen name="[id]" />
+      <Stack.Screen name="board" options={{ title: t('board.title') }} />
+    </Stack>
   );
 }

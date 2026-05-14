@@ -129,7 +129,8 @@
     "activeMissions": "active",
     "seeAll": "See all",
     "noPendingActions": "All caught up!",
-    "childPoints": "{{points}} pts"
+    "childPoints": "{{points}} pts",
+    "extras": "Extras"
   },
   "history": {
     "title": "History",
@@ -159,5 +160,14 @@
     "english": "English",
     "familyCode": "Family code",
     "profile": "Profile"
+  },
+  "board": {
+    "title": "Awards table",
+    "viewBoard": "View child's awards table",
+    "emojis": "Emojis",
+    "stickers": "Stickers",
+    "shapes": "Shapes",
+    "clear": "Clear all",
+    "clearConfirm": "Clear the entire board?"
   }
 }

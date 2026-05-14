@@ -3,6 +3,8 @@ import { View, Text, FlatList, StyleSheet, Alert, Pressable, Modal, KeyboardAvoi
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFamilyStore } from '@/stores/familyStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useGiftsStore } from '@/stores/giftsStore';
@@ -170,6 +172,23 @@ export default function ChildDetailScreen() {
           )}
         </View>
       </View>
+
+      <Touchable
+        onPress={() => router.push(`/child-detail/board?childId=${id}`)}
+      >
+        <LinearGradient
+          colors={['#43A047', '#66BB6A']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.boardCard}
+        >
+          <View style={styles.boardIconContainer}>
+            <Ionicons name="color-palette" size={22} color="#FFF" />
+          </View>
+          <Text style={styles.boardCardTitle}>{t('board.title')}</Text>
+          <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.7)" />
+        </LinearGradient>
+      </Touchable>
 
       <Touchable
         style={styles.managementToggle}
@@ -341,6 +360,34 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: SPACING.md,
     gap: SPACING.sm,
+  },
+  boardCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginTop: SPACING.md,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: BORDER_RADIUS.lg,
+    shadowColor: '#43A047',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  boardIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  boardCardTitle: {
+    flex: 1,
+    fontSize: FONT_SIZES.md,
+    fontWeight: '700',
+    color: '#FFF',
   },
   managementToggleText: {
     fontSize: FONT_SIZES.md,

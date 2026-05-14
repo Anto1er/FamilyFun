@@ -48,6 +48,7 @@ export default function ChildLayout() {
       {/* Hide sub-routes from tabs */}
       <Tabs.Screen name="missions" options={{ href: null }} />
       <Tabs.Screen name="wishlist" options={{ href: null }} />
+      <Tabs.Screen name="board" options={{ href: null, title: t('board.title') }} />
     </Tabs>
   );
 }
