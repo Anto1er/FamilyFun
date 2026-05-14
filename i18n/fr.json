@@ -108,7 +108,10 @@
     "deleteGiftConfirm": "Veux-tu vraiment supprimer ce souhait ?",
     "selectChild": "Pour qui ?",
     "wholeFamily": "Toute la famille",
-    "editGift": "Modifier le souhait"
+    "editGift": "Modifier le souhait",
+    "redeemFor": "Echanger pour {{name}}",
+    "redeemConfirm": "{{name}} va depenser {{cost}} points pour « {{gift}} ». Il lui restera {{remaining}} points.",
+    "childBalance": "Solde de {{name}}"
   },
   "dashboard": {
     "parentTitle": "Tableau de bord",

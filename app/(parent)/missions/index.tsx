@@ -47,6 +47,12 @@ export default function ParentMissionsScreen() {
       .map((s) => members.find((m) => m.id === s.child_id)?.display_name)
       .filter(Boolean);
 
+  const sortedMissions = [...missions].sort((a, b) => {
+    const aClaimed = submissions.some((s) => s.mission_id === a.id && s.status === 'claimed') ? 1 : 0;
+    const bClaimed = submissions.some((s) => s.mission_id === b.id && s.status === 'claimed') ? 1 : 0;
+    return bClaimed - aClaimed;
+  });
+
   const renderMission = ({ item }: { item: Mission }) => {
     const pendingCount = getPendingCount(item.id);
     const claimedNames = getClaimedChildren(item.id);
@@ -79,7 +85,7 @@ export default function ParentMissionsScreen() {
     <View style={styles.container}>
       <FlatList
         contentContainerStyle={styles.list}
-        data={missions}
+        data={sortedMissions}
         keyExtractor={(item) => item.id}
         renderItem={renderMission}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}

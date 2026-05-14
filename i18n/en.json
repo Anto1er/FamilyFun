@@ -108,7 +108,10 @@
     "deleteGiftConfirm": "Do you really want to delete this wish?",
     "selectChild": "Who is this for?",
     "wholeFamily": "Whole family",
-    "editGift": "Edit wish"
+    "editGift": "Edit wish",
+    "redeemFor": "Redeem for {{name}}",
+    "redeemConfirm": "{{name}} will spend {{cost}} points on '{{gift}}'. They will have {{remaining}} points remaining.",
+    "childBalance": "{{name}}'s balance"
   },
   "dashboard": {
     "parentTitle": "Dashboard",

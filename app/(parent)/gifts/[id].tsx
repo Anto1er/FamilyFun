@@ -17,16 +17,56 @@ export default function ParentGiftDetailScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const profile = useAuthStore((s) => s.profile);
-  const { gifts, approveGift, rejectGift, deleteGift } = useGiftsStore();
-  const { members } = useFamilyStore();
+  const { gifts, approveGift, rejectGift, redeemGift, deleteGift } = useGiftsStore();
+  const { members, fetchMembers } = useFamilyStore();
 
   const [pointsCost, setPointsCost] = useState('');
   const [loading, setLoading] = useState(false);
 
   const gift = gifts.find((g) => g.id === id);
-  const childName = gift ? members.find((m) => m.id === gift.child_id)?.display_name : '';
+  const childMember = gift ? members.find((m) => m.id === gift.child_id) : undefined;
+  const childName = childMember?.display_name ?? '';
 
   if (!gift) return null;
+
+  const childBalance = childMember?.points_balance ?? 0;
+  const canRedeem =
+    gift.status === 'approved' &&
+    gift.points_cost !== null &&
+    childBalance >= gift.points_cost;
+
+  const handleRedeem = async () => {
+    if (!gift.points_cost || !childMember) return;
+    const remaining = childBalance - gift.points_cost;
+    Alert.alert(
+      t('gifts.redeemFor', { name: childName }),
+      t('gifts.redeemConfirm', {
+        name: childName,
+        cost: gift.points_cost,
+        gift: gift.title,
+        remaining,
+      }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.confirm'),
+          onPress: async () => {
+            setLoading(true);
+            try {
+              await redeemGift(gift.id);
+              await fetchMembers(profile?.family_id ?? '');
+              Alert.alert(t('gifts.redeemed'));
+              router.back();
+            } catch (error) {
+              Alert.alert(t('common.error'), String(error));
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const handleApprove = async () => {
     if (!pointsCost || !profile) return;
@@ -124,11 +164,40 @@ export default function ParentGiftDetailScreen() {
       )}
 
       {gift.status === 'approved' && (
-        <Card style={styles.approvedCard}>
+        <View>
+          <Card style={styles.approvedCard}>
+            <Ionicons name="checkmark-circle" size={24} color={COLORS.success} />
+            <Text style={styles.approvedText}>
+              {t('gifts.approved')} - {gift.points_cost} pts
+            </Text>
+          </Card>
+
+          <Card style={styles.balanceCard}>
+            <Text style={styles.balanceLabel}>
+              {t('gifts.childBalance', { name: childName })}
+            </Text>
+            <Text style={styles.balanceValue}>{childBalance} pts</Text>
+          </Card>
+
+          <Button
+            title={
+              canRedeem
+                ? t('gifts.redeemFor', { name: childName })
+                : t('gifts.insufficientPoints')
+            }
+            onPress={handleRedeem}
+            loading={loading}
+            disabled={!canRedeem}
+            variant="secondary"
+            style={styles.button}
+          />
+        </View>
+      )}
+
+      {gift.status === 'redeemed' && (
+        <Card style={styles.redeemedCard}>
           <Ionicons name="checkmark-circle" size={24} color={COLORS.success} />
-          <Text style={styles.approvedText}>
-            {t('gifts.approved')} - {gift.points_cost} pts
-          </Text>
+          <Text style={styles.redeemedText}>{t('gifts.redeemed')}</Text>
         </Card>
       )}
 
@@ -195,5 +264,30 @@ const styles = StyleSheet.create({
     color: COLORS.success,
     fontWeight: '600',
     fontSize: FONT_SIZES.md,
+  },
+  balanceCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: SPACING.sm,
+  },
+  balanceLabel: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textSecondary,
+  },
+  balanceValue: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  redeemedCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    backgroundColor: '#E8F5E9',
+  },
+  redeemedText: {
+    color: COLORS.success,
+    fontWeight: '500',
   },
 });

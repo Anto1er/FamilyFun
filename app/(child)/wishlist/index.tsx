@@ -51,7 +51,7 @@ export default function ChildWishlistScreen() {
   };
 
   const renderGift = ({ item }: { item: Gift }) => (
-    <Touchable onPress={() => router.push(`./${item.id}`)}>
+    <Touchable onPress={() => router.push(`/(child)/wishlist/${item.id}`)}>
       <Card style={styles.giftCard}>
         <View style={styles.giftHeader}>
           <Ionicons name="gift" size={24} color={COLORS.secondary} />
@@ -86,7 +86,7 @@ export default function ChildWishlistScreen() {
       <View style={styles.fabContainer}>
         <Touchable
           style={styles.fab}
-          onPress={() => router.push('./add')}
+          onPress={() => router.push('/(child)/wishlist/add')}
         >
           <Ionicons name="add" size={28} color="#fff" />
         </Touchable>

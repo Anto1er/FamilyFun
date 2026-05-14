@@ -8,6 +8,7 @@ import { useMissionsStore } from '@/stores/missionsStore';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
+import { ConfettiOverlay } from '@/components/ui/ConfettiOverlay';
 import { COLORS, SPACING, FONT_SIZES } from '@/lib/constants';
 
 export default function MissionDetailScreen() {
@@ -19,6 +20,7 @@ export default function MissionDetailScreen() {
 
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const mission = missions.find((m) => m.id === id);
   const mySubmissions = submissions.filter(
@@ -50,15 +52,20 @@ export default function MissionDetailScreen() {
   const handleComplete = async () => {
     if (!profile?.family_id || !claimedSubmission) return;
     setLoading(true);
+    setShowConfetti(true);
     try {
       await completeClaim(claimedSubmission.id, profile.family_id, note || undefined);
-      Alert.alert(t('missions.submit'), t('missions.submitted'));
-      router.back();
     } catch (error: any) {
       Alert.alert(t('common.error'), error?.message || JSON.stringify(error));
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleConfettiDone = () => {
+    setShowConfetti(false);
+    Alert.alert(t('missions.submit'), t('missions.submitted'));
+    router.back();
   };
 
   const renderActions = () => {
@@ -91,6 +98,7 @@ export default function MissionDetailScreen() {
               title={t('missions.complete')}
               onPress={handleComplete}
               loading={loading}
+              celebrate
             />
           </View>
         </View>
@@ -107,26 +115,29 @@ export default function MissionDetailScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Card style={styles.card}>
-        <View style={styles.header}>
-          <Ionicons name="rocket" size={40} color={COLORS.primary} />
-          <Text style={styles.points}>+{mission.points_reward} pts</Text>
-        </View>
+    <View style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <Card style={styles.card}>
+          <View style={styles.header}>
+            <Ionicons name="rocket" size={40} color={COLORS.primary} />
+            <Text style={styles.points}>+{mission.points_reward} pts</Text>
+          </View>
 
-        <Text style={styles.title}>{mission.title}</Text>
-        {mission.description && (
-          <Text style={styles.description}>{mission.description}</Text>
-        )}
+          <Text style={styles.title}>{mission.title}</Text>
+          {mission.description && (
+            <Text style={styles.description}>{mission.description}</Text>
+          )}
 
-        <View style={styles.meta}>
-          <Text style={styles.metaText}>
-            {t(`missions.${mission.recurrence === 'one_time' ? 'oneTime' : mission.recurrence}`)}
-          </Text>
-        </View>
-      </Card>
+          <View style={styles.meta}>
+            <Text style={styles.metaText}>
+              {t(`missions.${mission.recurrence === 'one_time' ? 'oneTime' : mission.recurrence}`)}
+            </Text>
+          </View>
+        </Card>
 
-      {renderActions()}
+        {renderActions()}
+      </View>
+      <ConfettiOverlay visible={showConfetti} onDone={handleConfettiDone} />
     </View>
   );
 }

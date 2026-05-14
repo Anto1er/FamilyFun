@@ -9,6 +9,7 @@ import { useFamilyStore } from '@/stores/familyStore';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Touchable } from '@/components/ui/Touchable';
+import { ConfettiOverlay } from '@/components/ui/ConfettiOverlay';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '@/lib/constants';
 import { MissionSubmission } from '@/types';
 
@@ -22,6 +23,7 @@ export default function ParentMissionDetailScreen() {
   const fetchProfile = useAuthStore((s) => s.fetchProfile);
 
   const [assignLoading, setAssignLoading] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const mission = missions.find((m) => m.id === id);
   const missionSubmissions = submissions.filter((s) => s.mission_id === id);
@@ -38,6 +40,7 @@ export default function ParentMissionDetailScreen() {
 
   const handleValidate = async (submissionId: string, status: 'approved' | 'rejected') => {
     if (!profile) return;
+    if (status === 'approved') setShowConfetti(true);
     try {
       await validateSubmission(submissionId, status, profile.id);
       if (profile.family_id) {
@@ -63,6 +66,7 @@ export default function ParentMissionDetailScreen() {
 
   const handleDirectValidate = async (childId: string) => {
     if (!profile?.family_id || !profile?.id || !mission) return;
+    setShowConfetti(true);
     try {
       await parentDirectValidate(mission.id, childId, profile.family_id, profile.id);
       await fetchMembers(profile.family_id);
@@ -103,6 +107,7 @@ export default function ParentMissionDetailScreen() {
             title={t('missions.validateDirectly')}
             onPress={() => handleValidate(item.id, 'approved')}
             size="sm"
+            celebrate
           />
         </View>
       ) : item.status === 'pending' ? (
@@ -111,6 +116,7 @@ export default function ParentMissionDetailScreen() {
             title={t('missions.approved')}
             onPress={() => handleValidate(item.id, 'approved')}
             size="sm"
+            celebrate
             style={styles.approveBtn}
           />
           <Button
@@ -133,7 +139,7 @@ export default function ParentMissionDetailScreen() {
     </Card>
   );
 
-  return (
+  const content = (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Card style={styles.headerCard}>
         <View style={styles.headerRow}>
@@ -198,6 +204,13 @@ export default function ParentMissionDetailScreen() {
       )}
 
     </ScrollView>
+  );
+
+  return (
+    <View style={{ flex: 1 }}>
+      {content}
+      <ConfettiOverlay visible={showConfetti} onDone={() => setShowConfetti(false)} />
+    </View>
   );
 }
 
